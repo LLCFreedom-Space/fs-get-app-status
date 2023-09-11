@@ -114,7 +114,7 @@
       "location" : "https://github.com/vapor/redis.git",
       "state" : {
         "revision" : "2a8d3e4639b90b39b74309b54216bdfd9cb52b41",
-        "version" : "4.10.0"
+        "version" : "5.0.0-alpha.2.2"
       }
     },
     {
