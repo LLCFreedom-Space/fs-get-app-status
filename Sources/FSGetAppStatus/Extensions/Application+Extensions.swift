@@ -59,15 +59,3 @@ extension Application {
         set { storage[MongoDBStorageKey.self] = newValue }
     }
 }
-
-extension Application {
-    public struct ApplicationVersion: StorageKey {
-
-        public typealias Value = String
-    }
-
-    public var applicationVersion: String {
-        get { storage[ApplicationVersion.self] ?? "1.0.0" }
-        set { storage[ApplicationVersion.self] = newValue }
-    }
-}
