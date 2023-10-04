@@ -15,7 +15,7 @@ import Redis
 public struct FSGetAppStatus {
     /// Application
     let app: Application
-    
+
     /// Get status for `Redis` database
     /// - Returns: `String` - Connection status. Example - `Ok`
     public func getRedisStatus() -> EventLoopFuture<String> {
@@ -35,34 +35,34 @@ public struct FSGetAppStatus {
                 statusConnect
             }
     }
-    
+
     /// Get status for `PostgresSQL` database
     /// - Returns: `(String, String, HTTPResponseStatus)` - Connection status, version of database,  connection status code. Example - `Ok`, `PostgreSQL 14.1 (Debian 14.1-1.pgdg110+1) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit`,  `.ok`
     public func getPostgresStatus() -> EventLoopFuture<(String, String, HTTPResponseStatus)> {
         var statusConnect = String()
         var versionDatabase = String()
         var statusCode = HTTPResponseStatus.badRequest
-        return (app.db(.psql) as! PostgresDatabase).simpleQuery("SELECT version()")
-            .flatMapThrowing { rows -> Void  in
-                let row = rows.first?.makeRandomAccess()
-                if let version = row?[data: "version"].string {
-                    versionDatabase = version
-                    statusConnect = "Ok"
-                    statusCode = .ok
-                }
+        let version = (app.db(.psql) as? PostgresDatabase)?.simpleQuery("SELECT version()")
+        return version.unsafelyUnwrapped.flatMapThrowing { rows -> Void  in
+            let row = rows.first?.makeRandomAccess()
+            if let version = row?[data: "version"].string {
+                versionDatabase = version
+                statusConnect = "Ok"
+                statusCode = .ok
             }
-            .flatMapErrorThrowing { error in
-                app.logger.error("No connect to Postgres database. Reason: \(error)")
-                versionDatabase = "Version undefined for database Postgres"
-                statusConnect = "No connect to Postgres database. Reason: \(error)"
-            }
-            .map {
-                (status: statusConnect,
-                 version: versionDatabase,
-                 code: statusCode)
-            }
+        }
+        .flatMapErrorThrowing { error in
+            app.logger.error("No connect to Postgres database. Reason: \(error)")
+            versionDatabase = "Version undefined for database Postgres"
+            statusConnect = "No connect to Postgres database. Reason: \(error)"
+        }
+        .map {
+            (status: statusConnect,
+             version: versionDatabase,
+             code: statusCode)
+        }
     }
-    
+
     /// Get status for `MongoDB` database
     /// - Parameters:
     ///   - host: `String` of mongo database on which works. Example - `127.0.0.1`, `localhost`
@@ -71,7 +71,7 @@ public struct FSGetAppStatus {
     public func getMongoDBStatus(host: String, port: String) -> EventLoopFuture<(String, HTTPResponseStatus)> {
         var statusConnect = String()
         var statusCode = HTTPResponseStatus.notFound
-        
+
         return app.client.get(URI(string: "http://\(host):\(port)/?compressors=disabled&gssapiServiceName=mongodb"))
             .flatMapThrowing { res in
                 if res.status == .ok {
@@ -112,8 +112,8 @@ public struct FSGetAppStatus {
         var versionDatabase = String()
         var statusCode = HTTPResponseStatus.badRequest
         do {
-            let rows = try await (app.db(.psql) as! PostgresDatabase).simpleQuery("SELECT version()").get()
-            let row = rows.first?.makeRandomAccess()
+            let rows = try await (app.db(.psql) as? PostgresDatabase)?.simpleQuery("SELECT version()").get()
+            let row = rows?.first?.makeRandomAccess()
             if let version = row?[data: "version"].string {
                 versionDatabase = version
                 statusConnect = "Ok"
@@ -157,7 +157,7 @@ public struct FSGetAppStatus {
     public func applicationLaunchTime() {
         app.applicationUpTime = Double(DispatchTime.now().uptimeNanoseconds)
     }
-    
+
     /// Working time for `Application`
     /// - Returns: `Double` time the service has been running since it was started. Example - `98647017841958.0`
     public func applicationUpTime() -> Double {
