@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/orlandos-nl/BSON.git",
       "state" : {
-        "revision" : "944dfb3b0eb028f477c25ba6a071181de8ab903a",
-        "version" : "8.0.10"
+        "revision" : "c29936981d39667429d4e0ec03aa8d6a722ea36a",
+        "version" : "7.0.31"
       }
     },
     {
@@ -77,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/orlandos-nl/MongoKitten.git",
       "state" : {
-        "revision" : "34929f3126017edb1e29cfc16fb19881189cf58d",
-        "version" : "7.7.1"
+        "revision" : "a29b84eb12f05cec9ee26f78770dcec7e63a6771",
+        "version" : "6.7.14"
       }
     },
     {

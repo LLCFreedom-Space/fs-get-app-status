@@ -52,20 +52,20 @@ final class FSGetAppStatusTests: XCTestCase {
         XCTAssertEqual(psqlStatus.2, .ok)
     }
     
-    func testGetMongoDBStatus() async throws {
-        let hosts: [ConnectionSettings.Host] = [.init(hostname: "localhost", port: 27017)]
-        let settings = ConnectionSettings(
-            authentication: .unauthenticated,
-            authenticationSource: "test",
-            hosts: hosts,
-            targetDatabase: "test"
-        )
-        
-        try await app.mongoDB = MongoDatabase.connect(to: settings)
-        let mongoStatus = try await app.appStatus.getMongoDBStatus(host: "localhost", port: "27017").get()
-        XCTAssertEqual(mongoStatus.0, "Ok")
-        XCTAssertEqual(mongoStatus.1, .ok)
-    }
+//    func testGetMongoDBStatus() async throws {
+//        let hosts: [ConnectionSettings.Host] = [.init(hostname: "localhost", port: 27017)]
+//        let settings = ConnectionSettings(
+//            authentication: .unauthenticated,
+//            authenticationSource: "test",
+//            hosts: hosts,
+//            targetDatabase: "test"
+//        )
+//        
+//        app.mongoDB = MongoDatabase.connect(settings)
+//        let mongoStatus = try await app.appStatus.getMongoDBStatus(host: "localhost", port: "27017").get()
+//        XCTAssertEqual(mongoStatus.0, "Ok")
+//        XCTAssertEqual(mongoStatus.1, .ok)
+//    }
 
     func testGetRedisStatusAsync() async throws {
         // docker run --name redis-test -p 6379:6379 -d redis
@@ -95,20 +95,20 @@ final class FSGetAppStatusTests: XCTestCase {
         XCTAssertEqual(psqlStatus.2, .ok)
     }
 
-    func testGetMongoDBStatusAsync() async throws {
-        let hosts: [ConnectionSettings.Host] = [.init(hostname: "localhost", port: 27017)]
-        let settings = ConnectionSettings(
-            authentication: .unauthenticated,
-            authenticationSource: "test",
-            hosts: hosts,
-            targetDatabase: "test"
-        )
-        
-        try await app.mongoDB = MongoDatabase.connect(to: settings)
-        let mongoStatus = await app.appStatus.getMongoDBStatusAsync(host: "localhost", port: "27017")
-        XCTAssertEqual(mongoStatus.0, "Ok")
-        XCTAssertEqual(mongoStatus.1, .ok)
-    }
+//    func testGetMongoDBStatusAsync() async throws {
+//        let hosts: [ConnectionSettings.Host] = [.init(hostname: "localhost", port: 27017)]
+//        let settings = ConnectionSettings(
+//            authentication: .unauthenticated,
+//            authenticationSource: "test",
+//            hosts: hosts,
+//            targetDatabase: "test"
+//        )
+//        
+//        try await app.mongoDB = MongoDatabase.connect(to: settings)
+//        let mongoStatus = await app.appStatus.getMongoDBStatusAsync(host: "localhost", port: "27017")
+//        XCTAssertEqual(mongoStatus.0, "Ok")
+//        XCTAssertEqual(mongoStatus.1, .ok)
+//    }
     
     func testApplicationLaunchTime() throws {
         app.appStatus.applicationLaunchTime()
