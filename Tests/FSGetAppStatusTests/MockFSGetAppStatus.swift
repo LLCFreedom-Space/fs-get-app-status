@@ -10,42 +10,46 @@
 import Vapor
 @testable import FSGetAppStatus
 
-struct MockFSGetAppStatus: FSGetAppStatusServiceable {
-    var eventLoop: EventLoop
+public struct MockFSGetAppStatus: FSGetAppStatusServiceable {
+    public var eventLoop: EventLoop
 
-    func getRedisStatus() -> EventLoopFuture<String> {
+    public init(eventLoop: EventLoop) {
+        self.eventLoop = eventLoop
+    }
+
+    public func getRedisStatus() -> EventLoopFuture<String> {
         return eventLoop.future("Ok")
     }
 
-    func getPostgresStatus() -> EventLoopFuture<(String, String, HTTPResponseStatus)> {
+    public func getPostgresStatus() -> EventLoopFuture<(String, String, HTTPResponseStatus)> {
         return eventLoop.future(("Ok", "Ok", HTTPResponseStatus.ok))
     }
 
-    func getMongoDBStatus(host: String, port: String) -> EventLoopFuture<(String, HTTPResponseStatus)> {
+    public func getMongoDBStatus(host: String, port: String) -> EventLoopFuture<(String, HTTPResponseStatus)> {
         return eventLoop.future(("Ok", HTTPResponseStatus.ok))
     }
 
-    func getRedisStatusAsync() async -> String {
+    public func getRedisStatusAsync() async -> String {
         "Ok"
     }
 
-    func getPostgresStatusAsync() async -> (String, String, HTTPResponseStatus) {
+    public func getPostgresStatusAsync() async -> (String, String, HTTPResponseStatus) {
         return ("Ok", "Ok", HTTPResponseStatus.ok)
     }
 
-    func getMongoDBStatusAsync(host: String, port: String) async -> (String, HTTPResponseStatus) {
+    public func getMongoDBStatusAsync(host: String, port: String) async -> (String, HTTPResponseStatus) {
         return ("Ok", HTTPResponseStatus.ok)
     }
 
-    func applicationLaunchTime() { }
+    public func applicationLaunchTime() { }
 
-    func applicationUpTime() -> Double {
+    public func applicationUpTime() -> Double {
         Double()
     }
 
-    func applicationLaunchDate() { }
+    public func applicationLaunchDate() { }
 
-    func applicationUpDate() -> String {
+    public func applicationUpDate() -> String {
         ""
     }
 }
