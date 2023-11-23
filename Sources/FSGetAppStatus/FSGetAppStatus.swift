@@ -103,7 +103,7 @@ public struct FSGetAppStatus: FSGetAppStatusServiceable {
         do {
             let responseRedis = try await app.redis.ping().get()
             if responseRedis.description == "PONG" {
-                return ("Ok", statusCode)
+                return ("Ok", .ok)
             } else {
                 return ("No connect to Redis database. Response: \(responseRedis.description)", statusCode)
             }
