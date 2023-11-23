@@ -27,7 +27,7 @@ final class FSGetAppStatusTests: XCTestCase {
     func testGetRedisStatus() throws {
         // docker run --name redis-test -p 6379:6379 -d redis
         app.redis.configuration = try .init(hostname: "localhost")
-        let redisStatus = try app.appStatus?.getRedisStatus().wait()
+        let redisStatus = try app.appStatus.getRedisStatus().wait()
         XCTAssertEqual(redisStatus, "Ok")
     }
     
@@ -46,10 +46,10 @@ final class FSGetAppStatusTests: XCTestCase {
             ),
             as: .psql
         )
-        let psqlStatus = try app.appStatus?.getPostgresStatus().wait()
-        XCTAssertEqual(psqlStatus?.0, "Ok")
-        XCTAssertNotEqual(psqlStatus?.1, "Version undefined")
-        XCTAssertEqual(psqlStatus?.2, .ok)
+        let psqlStatus = try app.appStatus.getPostgresStatus().wait()
+        XCTAssertEqual(psqlStatus.0, "Ok")
+        XCTAssertNotEqual(psqlStatus.1, "Version undefined")
+        XCTAssertEqual(psqlStatus.2, .ok)
     }
     
     func testGetMongoDBStatus() async throws {
@@ -62,15 +62,15 @@ final class FSGetAppStatusTests: XCTestCase {
         )
         
         try await app.mongoDB = MongoDatabase.connect(to: settings)
-        let mongoStatus = try await app.appStatus?.getMongoDBStatus(host: "localhost", port: "27017").get()
-        XCTAssertEqual(mongoStatus?.0, "Ok")
-        XCTAssertEqual(mongoStatus?.1, .ok)
+        let mongoStatus = try await app.appStatus.getMongoDBStatus(host: "localhost", port: "27017").get()
+        XCTAssertEqual(mongoStatus.0, "Ok")
+        XCTAssertEqual(mongoStatus.1, .ok)
     }
 
     func testGetRedisStatusAsync() async throws {
         // docker run --name redis-test -p 6379:6379 -d redis
         app.redis.configuration = try .init(hostname: "localhost")
-        let redisStatus = await app.appStatus?.getRedisStatusAsync()
+        let redisStatus = await app.appStatus.getRedisStatusAsync()
         XCTAssertEqual(redisStatus, "Ok")
     }
 
@@ -89,10 +89,10 @@ final class FSGetAppStatusTests: XCTestCase {
             ),
             as: .psql
         )
-        let psqlStatus = await app.appStatus?.getPostgresStatusAsync()
-        XCTAssertEqual(psqlStatus?.0, "Ok")
-        XCTAssertNotEqual(psqlStatus?.1, "Version undefined")
-        XCTAssertEqual(psqlStatus?.2, .ok)
+        let psqlStatus = await app.appStatus.getPostgresStatusAsync()
+        XCTAssertEqual(psqlStatus.0, "Ok")
+        XCTAssertNotEqual(psqlStatus.1, "Version undefined")
+        XCTAssertEqual(psqlStatus.2, .ok)
     }
 
     func testGetMongoDBStatusAsync() async throws {
@@ -105,25 +105,25 @@ final class FSGetAppStatusTests: XCTestCase {
         )
         
         try await app.mongoDB = MongoDatabase.connect(to: settings)
-        let mongoStatus = await app.appStatus?.getMongoDBStatusAsync(host: "localhost", port: "27017")
-        XCTAssertEqual(mongoStatus?.0, "Ok")
-        XCTAssertEqual(mongoStatus?.1, .ok)
+        let mongoStatus = await app.appStatus.getMongoDBStatusAsync(host: "localhost", port: "27017")
+        XCTAssertEqual(mongoStatus.0, "Ok")
+        XCTAssertEqual(mongoStatus.1, .ok)
     }
     
     func testApplicationLaunchTime() throws {
-        app.appStatus?.applicationLaunchTime()
+        app.appStatus.applicationLaunchTime()
         XCTAssertNotNil(app.applicationUpTime)
     }
     
     func testGetApplicationUpTime() throws {
         app.applicationUpTime = Double(DispatchTime.now().uptimeNanoseconds)
-        let defaultAppTime = app.appStatus?.applicationUpTime()
+        let defaultAppTime = app.appStatus.applicationUpTime()
         XCTAssertNotNil(defaultAppTime)
     }
     
     func testGetApplicationUpDate() throws {
         app.applicationUpDate = "2022-05-08 12:27:50.654GMT+3"
-        let fullDateApplicationTime = app.appStatus?.applicationUpDate()
+        let fullDateApplicationTime = app.appStatus.applicationUpDate()
         XCTAssertNotNil(fullDateApplicationTime)
     }
 }

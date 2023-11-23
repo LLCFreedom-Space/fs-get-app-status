@@ -15,8 +15,13 @@ extension Application {
         public typealias Value = FSGetAppStatusServiceable
     }
 
-    public var appStatus: FSGetAppStatusServiceable? {
-        get { storage[FSGetAppStatusKey.self] }
+    public var appStatus: FSGetAppStatusServiceable {
+        get {
+            guard let appStatus = storage[FSGetAppStatusKey.self] else {
+                fatalError("FSGetAppStatus not setup.")
+            }
+            return appStatus
+        }
         set { storage[FSGetAppStatusKey.self] = newValue }
     }
 }
