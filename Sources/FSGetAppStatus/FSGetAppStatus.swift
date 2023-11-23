@@ -12,7 +12,7 @@ import Fluent
 import Vapor
 import Redis
 
-public struct FSGetAppStatus {
+public struct FSGetAppStatus: FSGetAppStatusServiceable {
     /// Application
     let app: Application
 
