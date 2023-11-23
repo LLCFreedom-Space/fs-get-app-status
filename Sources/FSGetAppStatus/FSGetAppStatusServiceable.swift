@@ -13,13 +13,13 @@ import Vapor
 import Redis
 
 public protocol FSGetAppStatusServiceable {
-    func getRedisStatus() -> EventLoopFuture<String>
+    func getRedisStatus() -> EventLoopFuture<(String, HTTPResponseStatus)>
 
     func getPostgresStatus() -> EventLoopFuture<(String, String, HTTPResponseStatus)>
 
     func getMongoDBStatus(host: String, port: String) -> EventLoopFuture<(String, HTTPResponseStatus)>
 
-    func getRedisStatusAsync() async -> String
+    func getRedisStatusAsync() async -> (String, HTTPResponseStatus)
 
     func getPostgresStatusAsync() async -> (String, String, HTTPResponseStatus)
 

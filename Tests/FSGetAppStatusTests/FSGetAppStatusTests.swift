@@ -28,7 +28,7 @@ final class FSGetAppStatusTests: XCTestCase {
         // docker run --name redis-test -p 6379:6379 -d redis
         app.redis.configuration = try .init(hostname: "localhost")
         let redisStatus = try app.appStatus.getRedisStatus().wait()
-        XCTAssertEqual(redisStatus, "Ok")
+        XCTAssertEqual(redisStatus.0, "Ok")
     }
     
     func testGetPostgresStatus() throws {
@@ -71,7 +71,7 @@ final class FSGetAppStatusTests: XCTestCase {
         // docker run --name redis-test -p 6379:6379 -d redis
         app.redis.configuration = try .init(hostname: "localhost")
         let redisStatus = await app.appStatus.getRedisStatusAsync()
-        XCTAssertEqual(redisStatus, "Ok")
+        XCTAssertEqual(redisStatus.0, "Ok")
     }
 
     func testGetPostgresStatusAsync() async throws {
