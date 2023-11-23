@@ -14,7 +14,11 @@ import Redis
 
 public struct FSGetAppStatus: FSGetAppStatusServiceable {
     /// Application
-    let app: Application
+    public let app: Application
+
+    public init(app: Application) {
+        self.app = app
+    }
 
     /// Get status for `Redis` database
     /// - Returns: `String` - Connection status. Example - `Ok`

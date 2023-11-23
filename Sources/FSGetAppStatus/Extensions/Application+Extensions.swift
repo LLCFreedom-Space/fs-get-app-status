@@ -11,8 +11,18 @@ import Vapor
 import MongoKitten
 
 extension Application {
-    public var appStatus: FSGetAppStatus {
-        .init(app: self)
+    public struct FSGetAppStatusKey: StorageKey {
+        public typealias Value = FSGetAppStatusServiceable
+    }
+
+    public var appStatus: FSGetAppStatusServiceable {
+        get {
+            guard let appStatus = storage[FSGetAppStatusKey.self] else {
+                fatalError("FSGetAppStatus not setup.")
+            }
+            return appStatus
+        }
+        set { storage[FSGetAppStatusKey.self] = newValue }
     }
 }
 
