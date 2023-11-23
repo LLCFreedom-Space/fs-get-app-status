@@ -22,13 +22,15 @@ public struct FSGetAppStatus: FSGetAppStatusServiceable {
 
     /// Get status for `Redis` database
     /// - Returns: `String` - Connection status. Example - `Ok`
-    public func getRedisStatus() -> EventLoopFuture<String> {
+    public func getRedisStatus() -> EventLoopFuture<(String, HTTPResponseStatus)> {
         try? app.boot()
         var statusConnect = String()
+        var statusCode = HTTPResponseStatus.serviceUnavailable
         return app.redis.ping()
             .flatMapThrowing { responseRedis in
                 if responseRedis.description == "PONG" {
                     statusConnect = "Ok"
+                    statusCode = .ok
                 }
             }
             .flatMapErrorThrowing { error in
@@ -36,7 +38,7 @@ public struct FSGetAppStatus: FSGetAppStatusServiceable {
                 statusConnect = "No connect to Redis database. Reason: \(error)"
             }
             .map {
-                statusConnect
+                (statusConnect, statusCode)
             }
     }
 
@@ -45,7 +47,7 @@ public struct FSGetAppStatus: FSGetAppStatusServiceable {
     public func getPostgresStatus() -> EventLoopFuture<(String, String, HTTPResponseStatus)> {
         var statusConnect = String()
         var versionDatabase = String()
-        var statusCode = HTTPResponseStatus.badRequest
+        var statusCode = HTTPResponseStatus.serviceUnavailable
         let version = (app.db(.psql) as? PostgresDatabase)?.simpleQuery("SELECT version()")
         return version.unsafelyUnwrapped.flatMapThrowing { rows -> Void  in
             let row = rows.first?.makeRandomAccess()
@@ -94,18 +96,19 @@ public struct FSGetAppStatus: FSGetAppStatusServiceable {
 
     /// Get status for `Redis` database
     /// - Returns: `String` - Connection status. Example - `Ok`
-    public func getRedisStatusAsync() async -> String {
+    public func getRedisStatusAsync() async -> (String, HTTPResponseStatus) {
         try? app.boot()
+        let statusCode = HTTPResponseStatus.serviceUnavailable
         do {
             let responseRedis = try await app.redis.ping().get()
             if responseRedis.description == "PONG" {
-                return "Ok"
+                return ("Ok", .ok)
             } else {
-                return "No connect to Redis database. Response: \(responseRedis.description)"
+                return ("No connect to Redis database. Response: \(responseRedis.description)", statusCode)
             }
         } catch {
             app.logger.error("No connect to Redis database. Reason: \(error)")
-            return "No connect to Redis database. Reason: \(error)"
+            return ("No connect to Redis database. Reason: \(error)", statusCode)
         }
     }
 

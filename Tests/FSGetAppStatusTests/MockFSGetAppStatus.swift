@@ -17,8 +17,8 @@ public struct MockFSGetAppStatus: FSGetAppStatusServiceable {
         self.eventLoop = eventLoop
     }
 
-    public func getRedisStatus() -> EventLoopFuture<String> {
-        return eventLoop.future("Ok")
+    public func getRedisStatus() -> EventLoopFuture<(String, HTTPResponseStatus)> {
+        return eventLoop.future(("Ok", .ok))
     }
 
     public func getPostgresStatus() -> EventLoopFuture<(String, String, HTTPResponseStatus)> {
@@ -29,8 +29,8 @@ public struct MockFSGetAppStatus: FSGetAppStatusServiceable {
         return eventLoop.future(("Ok", HTTPResponseStatus.ok))
     }
 
-    public func getRedisStatusAsync() async -> String {
-        "Ok"
+    public func getRedisStatusAsync() async -> (String, HTTPResponseStatus) {
+        ("Ok", .ok)
     }
 
     public func getPostgresStatusAsync() async -> (String, String, HTTPResponseStatus) {
