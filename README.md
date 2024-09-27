@@ -4,7 +4,7 @@ Quick implementation of getting the application status.
 
 ## Swift version
 
-The latest version of FSGetAppStatus requires **Swift 5.7** and **MacOS v12** or later. You can download this version of the Swift binaries by following this [link](https://swift.org/download/).
+The latest version of FSGetAppStatus requires **Swift 5.9** and **MacOS v13** or later. You can download this version of the Swift binaries by following this [link](https://swift.org/download/).
 
 ## Usage
 
