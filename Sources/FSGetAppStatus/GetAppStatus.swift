@@ -1,10 +1,25 @@
+// FS Get App Status
+// Copyright (C) 2025  FREEDOM SPACE, LLC
+
 //
-//  FSGetAppStatus.swift
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Affero General Public License as published
+//  by the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Affero General Public License for more details.
+//
+//  You should have received a copy of the GNU Affero General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+//
+//  GetAppStatus.swift
 //
 //
 //  Created by Mykola Buhaiov on 09.03.2023.
-//  Copyright © 2023 Freedom Space LLC
-//  All rights reserved: http://opensource.org/licenses/MIT
 //
 
 import FluentPostgresDriver
@@ -12,7 +27,7 @@ import Fluent
 import Vapor
 import Redis
 
-public struct FSGetAppStatus: FSGetAppStatusServiceable {
+public struct GetAppStatus: GetAppStatusServiceable, @unchecked Sendable {
     /// Application
     public let app: Application
 
@@ -22,82 +37,8 @@ public struct FSGetAppStatus: FSGetAppStatusServiceable {
 
     /// Get status for `Redis` database
     /// - Returns: `String` - Connection status. Example - `Ok`
-    public func getRedisStatus() -> EventLoopFuture<(String, HTTPResponseStatus)> {
-        try? app.boot()
-        var statusConnect = String()
-        var statusCode = HTTPResponseStatus.serviceUnavailable
-        return app.redis.ping()
-            .flatMapThrowing { responseRedis in
-                if responseRedis.description == "PONG" {
-                    statusConnect = "Ok"
-                    statusCode = .ok
-                }
-            }
-            .flatMapErrorThrowing { error in
-                app.logger.error("No connect to Redis database. Reason: \(error)")
-                statusConnect = "No connect to Redis database. Reason: \(error)"
-            }
-            .map {
-                (statusConnect, statusCode)
-            }
-    }
-
-    /// Get status for `PostgresSQL` database
-    /// - Returns: `(String, String, HTTPResponseStatus)` - Connection status, version of database,  connection status code. Example - `Ok`, `PostgreSQL 14.1 (Debian 14.1-1.pgdg110+1) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit`,  `.ok`
-    public func getPostgresStatus() -> EventLoopFuture<(String, String, HTTPResponseStatus)> {
-        var statusConnect = String()
-        var versionDatabase = String()
-        var statusCode = HTTPResponseStatus.serviceUnavailable
-        let version = (app.db(.psql) as? PostgresDatabase)?.simpleQuery("SELECT version()")
-        return version.unsafelyUnwrapped.flatMapThrowing { rows -> Void  in
-            let row = rows.first?.makeRandomAccess()
-            if let version = row?[data: "version"].string {
-                versionDatabase = version
-                statusConnect = "Ok"
-                statusCode = .ok
-            }
-        }
-        .flatMapErrorThrowing { error in
-            app.logger.error("No connect to Postgres database. Reason: \(error)")
-            versionDatabase = "Version undefined for database Postgres"
-            statusConnect = "No connect to Postgres database. Reason: \(error)"
-        }
-        .map {
-            (status: statusConnect,
-             version: versionDatabase,
-             code: statusCode)
-        }
-    }
-
-    /// Get status for `MongoDB` database
-    /// - Parameters:
-    ///   - host: `String` of mongo database on which works. Example - `127.0.0.1`, `localhost`
-    ///   - port: `String` of mongo database on which works. Example - `27017`
-    /// - Returns: `(String, HTTPResponseStatus)` - Connection status,  connection status code. Example - `Ok`, `.ok`
-    public func getMongoDBStatus(host: String, port: String) -> EventLoopFuture<(String, HTTPResponseStatus)> {
-        var statusConnect = String()
-        var statusCode = HTTPResponseStatus.notFound
-
-        return app.client.get(URI(string: "http://\(host):\(port)/?compressors=disabled&gssapiServiceName=mongodb"))
-            .flatMapThrowing { res in
-                if res.status == .ok {
-                    statusConnect = "Ok"
-                    statusCode = .ok
-                }
-            }
-            .flatMapErrorThrowing { error in
-                app.logger.error("No connect to MongoDB database. Reason: \(error)")
-                statusConnect = "No connect to MongoDB database. Reason: \(error)"
-            }
-            .map {
-                (status: statusConnect, code: statusCode)
-            }
-    }
-
-    /// Get status for `Redis` database
-    /// - Returns: `String` - Connection status. Example - `Ok`
-    public func getRedisStatusAsync() async -> (String, HTTPResponseStatus) {
-        try? app.boot()
+    public func getRedisStatus() async -> (String, HTTPResponseStatus) {
+        try? await app.asyncBoot()
         let statusCode = HTTPResponseStatus.serviceUnavailable
         do {
             let responseRedis = try await app.redis.ping().get()
@@ -114,7 +55,7 @@ public struct FSGetAppStatus: FSGetAppStatusServiceable {
 
     /// Get status for `PostgresSQL` database
     /// - Returns: `(String, String, HTTPResponseStatus)` - Connection status, version of database,  connection status code. Example - `Ok`, `PostgreSQL 14.1 (Debian 14.1-1.pgdg110+1) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit`,  `.ok`
-    public func getPostgresStatusAsync() async -> (String, String, HTTPResponseStatus) {
+    public func getPostgresStatus() async -> (String, String, HTTPResponseStatus) {
         var statusConnect = String()
         var versionDatabase = String()
         var statusCode = HTTPResponseStatus.badRequest
@@ -143,7 +84,7 @@ public struct FSGetAppStatus: FSGetAppStatusServiceable {
     ///   - host: `String` of mongo database on which works. Example - `127.0.0.1`, `localhost`
     ///   - port: `String` of mongo database on which works. Example - `27017`
     /// - Returns: `(String, HTTPResponseStatus)` - Connection status,  connection status code. Example - `Ok`, `.ok`
-    public func getMongoDBStatusAsync(host: String, port: String) async -> (String, HTTPResponseStatus) {
+    public func getMongoDBStatus(host: String, port: String) async -> (String, HTTPResponseStatus) {
         var statusConnect = String()
         var statusCode = HTTPResponseStatus.notFound
 

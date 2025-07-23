@@ -16,12 +16,29 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //
-//  Constants.swift
+//  GetAppStatusServiceable.swift
 //
 //
 //  Created by Mykola Buhaiov on 09.03.2023.
 //
 
+import FluentPostgresDriver
+import Fluent
 import Vapor
+import Redis
 
-public let defaultDateFormat = "yyyy-MM-dd HH:mm:ss.SSSz"
+public protocol GetAppStatusServiceable: Sendable {
+    func getRedisStatus() async -> (String, HTTPResponseStatus)
+
+    func getPostgresStatus() async -> (String, String, HTTPResponseStatus)
+
+    func getMongoDBStatus(host: String, port: String) async -> (String, HTTPResponseStatus)
+
+    func applicationLaunchTime()
+
+    func applicationUpTime() -> Double
+
+    func applicationLaunchDate()
+
+    func applicationUpDate() -> String
+}
