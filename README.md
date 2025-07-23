@@ -4,38 +4,38 @@ Quick implementation of getting the application status.
 
 ## Swift version
 
-The latest version of FSGetAppStatus requires **Swift 5.9** and **MacOS v13** or later. You can download this version of the Swift binaries by following this [link](https://swift.org/download/).
+The latest version of GetAppStatus requires **Swift 6.0** and **MacOS v14** or later. You can download this version of the Swift binaries by following this [link](https://swift.org/download/).
 
 ## Usage
 
 ### Swift Package Manager
 
 #### Add dependencies using the version
-Add the `FSGetAppStatus` package to the dependencies within your application’s `Package.swift` file. Substitute `"x.x.x"` with the latest `FSGetAppStatus` [release](https://github.com/LLCFreedom-Space/fs-get-app-status/releases).
+Add the `GetAppStatus` package to the dependencies within your application’s `Package.swift` file. Substitute `"x.x.x"` with the latest `GetAppStatus` [release](https://github.com/LLCFreedom-Space/fs-get-app-status/releases).
 ```swift
 .package(url: "https://github.com/LLCFreedom-Space/fs-get-app-status.git", from: "x.x.x")
 ```
-Add `FSGetAppStatus` to your target's dependencies:
+Add `GetAppStatus` to your target's dependencies:
 ```swift
-.target(name: "FSGetAppStatus", dependencies: ["FSGetAppStatus"]),
+.target(name: "GetAppStatus", dependencies: ["GetAppStatus"]),
 ```
 #### Import package
 ```swift
-import FSGetAppStatus
+import GetAppStatus
 ```
 
 #### Add dependencies using the branch
-Add the `FSGetAppStatus` package to the dependencies within your application’s `Package.swift` file. Substitute `"name branch"` with the latest `FSGetAppStatus` [release](https://github.com/LLCFreedom-Space/fs-get-app-status/releases).
+Add the `GetAppStatus` package to the dependencies within your application’s `Package.swift` file. Substitute `"name branch"` with the latest `GetAppStatus` [release](https://github.com/LLCFreedom-Space/fs-get-app-status/releases).
 ```swift
 .package(url: "https://github.com/LLCFreedom-Space/fs-get-app-status.git", branch: "name branch")
 ```
 Add `FSGetAppStatus` to your target's dependencies:
 ```swift
-.target(name: "FSGetAppStatus", dependencies: ["FSGetAppStatus"]),
+.target(name: "GetAppStatus", dependencies: ["GetAppStatus"]),
 ```
 #### Import package
 ```swift
-import FSGetAppStatus
+import GetAppStatus
 ```
 
 ## Getting Started
