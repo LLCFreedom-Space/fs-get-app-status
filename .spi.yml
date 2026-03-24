@@ -1,4 +1,4 @@
 version: 1
 builder:
   configs:
-    - documentation_targets: [fs-app-health-checks]
+    - documentation_targets: [fs-get-app-status]
