@@ -24,4 +24,20 @@
 
 import Vapor
 
+/// The default date format used across the application.
+///
+/// This format follows the pattern:
+/// `yyyy-MM-dd HH:mm:ss.SSSz`
+///
+/// - Components:
+///   - `yyyy`: Four-digit year
+///   - `MM`: Two-digit month
+///   - `dd`: Two-digit day
+///   - `HH`: Hour in 24-hour format
+///   - `mm`: Minutes
+///   - `ss`: Seconds
+///   - `SSS`: Milliseconds
+///   - `z`: Time zone abbreviation
+///
+/// - Example: `2026-03-24 18:45:12.123+0200`
 public let defaultDateFormat = "yyyy-MM-dd HH:mm:ss.SSSz"

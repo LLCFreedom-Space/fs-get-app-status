@@ -24,33 +24,55 @@
 
 import Vapor
 
-/// A generic `App` status data that can be sent in response.
+/// A generic application status response that can be returned from a health check endpoint.
+///
+/// This model aggregates system-level and service-level information such as uptime,
+/// hardware metrics, and connectivity status for external dependencies like Redis,
+/// PostgreSQL, and MongoDB.
 public struct AppStatusResponse: Content {
-    /// Representable the App is work
+    /// Indicates the overall application status (e.g., `"Ok"`, `"Degraded"`, `"Down"`).
     public var appStatus: String = "Ok"
-    /// Representable app uptime in TimeInterval
+    /// The total system uptime in seconds.
     public var systemUptime: TimeInterval
-    /// Server active Processor Count
+    /// The number of active CPU cores available to the application.
     public var activeProcessorCount: Int
-    /// Server Operating System
+    /// The operating system version running the application.
     public var operatingSystemVersion: String
-    /// Physical Memory in Server
+    /// The total physical memory available on the server (in GB).
     public var physicalMemory: Double
-    /// Representable Redis connection status
+    /// The current Redis connection status (e.g., `"Ok"` or `"Unavailable"`).
     public var redisConnectionStatus: String?
-    /// Representable Redis version
+    /// The Redis server version.
     public var redisVersion: String?
-    /// Representable PostgreSQL connection status
+    /// The current PostgreSQL connection status (e.g., `"Ok"` or `"Unavailable"`).
     public var psqlConnectionStatus: String?
-    /// Representable PostgreSQL version
+    /// The PostgreSQL server version.
     public var psqlVersion: String?
-    /// Representable MongoDB connection status
+    /// The current MongoDB connection status (e.g., `"Ok"` or `"Unavailable"`).
     public var mongoConnectionStatus: String?
-    /// Representable MongoDB version
+    /// The MongoDB server version.
     public var mongoVersion: String?
+    /// The name of the application.
     public var appName: String?
+    /// The current version of the application.
     public var appVersion: String?
 
+    /// Creates a new `AppStatusResponse`.
+    ///
+    /// - Parameters:
+    ///   - appStatus: The overall application status. Defaults to `"Ok"`.
+    ///   - systemUptime: The system uptime in seconds.
+    ///   - activeProcessorCount: The number of active CPU cores.
+    ///   - operatingSystemVersion: The OS version string.
+    ///   - physicalMemory: The total physical memory (in GB).
+    ///   - redisConnectionStatus: Redis connection status.
+    ///   - psqlConnectionStatus: PostgreSQL connection status.
+    ///   - mongoConnectionStatus: MongoDB connection status.
+    ///   - redisVersion: Redis version string.
+    ///   - psqlVersion: PostgreSQL version string.
+    ///   - mongoVersion: MongoDB version string.
+    ///   - appName: Application name.
+    ///   - appVersion: Application version.
     public init(
         appStatus: String = "Ok",
         systemUptime: TimeInterval,
@@ -81,6 +103,7 @@ public struct AppStatusResponse: Content {
         self.appVersion = appVersion
     }
 
+    /// An example instance of `AppStatusResponse` for testing or documentation purposes.
     public static var example: AppStatusResponse {
         AppStatusResponse(
             appStatus: "Ok",
@@ -99,6 +122,7 @@ public struct AppStatusResponse: Content {
         )
     }
 
+    /// Coding keys used to map properties to snake_case JSON representation.
     public enum CodingKeys: String, CodingKey {
         case appStatus = "app_status"
         case systemUptime = "system_uptime"
