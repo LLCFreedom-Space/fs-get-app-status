@@ -26,12 +26,6 @@ import Vapor
 @testable import GetAppStatus
 
 public struct MockGetAppStatus: GetAppStatusServiceable {
-    public var eventLoop: EventLoop
-
-    public init(eventLoop: EventLoop) {
-        self.eventLoop = eventLoop
-    }
-
     public func getRedisStatus() async -> (String, HTTPResponseStatus) {
         ("Ok", .ok)
     }

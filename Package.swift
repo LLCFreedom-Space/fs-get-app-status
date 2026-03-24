@@ -9,7 +9,9 @@ let package = Package(
         .macOS(.v13)
     ],
     products: [
-        .library(name: "GetAppStatus", targets: ["GetAppStatus"]),
+        // Products define the executables and libraries a package produces, making them visible to other packages.
+        .library(name: "GetAppStatus",
+                 targets: ["GetAppStatus"]),
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
@@ -22,6 +24,7 @@ let package = Package(
         .package(url: "https://github.com/orlandos-nl/MongoKitten.git", from: "7.2.0"),
         //  Vapor provider for RedisKit + RedisNIO
         .package(url: "https://github.com/vapor/redis.git", from: "5.0.0-alpha.2.2"),
+        .package(url: "https://github.com/apple/swift-docc-plugin.git", from: "1.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -42,6 +45,6 @@ let package = Package(
                 .target(name: "GetAppStatus"),
                 .product(name: "VaporTesting", package: "vapor"),
             ]
-        ),
+        )
     ]
 )
