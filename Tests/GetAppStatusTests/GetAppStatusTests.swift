@@ -97,6 +97,7 @@ struct GetAppStatusTests {
     @Test("Application launch time")
     func applicationLaunchTime() async throws {
         try await withApp { app in
+            app.appStatus = MockGetAppStatus()
             app.appStatus.applicationLaunchTime()
             #expect(app.applicationUpTime.isZero == false)
         }
@@ -105,6 +106,7 @@ struct GetAppStatusTests {
     @Test("Get application up time")
     func getApplicationUpTime() async throws {
         try await withApp { app in
+            app.appStatus = MockGetAppStatus()
             app.applicationUpTime = Double(DispatchTime.now().uptimeNanoseconds)
             let defaultAppTime = app.appStatus.applicationUpTime()
             #expect(defaultAppTime.isZero == false)
@@ -114,6 +116,7 @@ struct GetAppStatusTests {
     @Test("Get application up date")
     func getApplicationUpDate() async throws {
         try await withApp { app in
+            app.appStatus = MockGetAppStatus()
             app.applicationUpDate = "2022-05-08 12:27:50.654GMT+3"
             let fullDateApplicationTime = app.appStatus.applicationUpDate()
             #expect(fullDateApplicationTime.isEmpty == false)
