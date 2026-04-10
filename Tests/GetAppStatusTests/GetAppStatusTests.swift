@@ -99,7 +99,7 @@ struct GetAppStatusTests {
         try await withApp { app in
             app.appStatus = GetAppStatus(app: app)
             app.appStatus.applicationLaunchTime()
-            #expect(app.applicationUpTime.isZero == true)
+            #expect(app.applicationUpTime.isZero == false)
         }
     }
 
@@ -109,7 +109,7 @@ struct GetAppStatusTests {
             app.appStatus = GetAppStatus(app: app)
             app.applicationUpTime = Double(DispatchTime.now().uptimeNanoseconds)
             let defaultAppTime = app.appStatus.applicationUpTime()
-            #expect(defaultAppTime.isZero == true)
+            #expect(defaultAppTime.isZero == false)
         }
     }
 
@@ -119,7 +119,7 @@ struct GetAppStatusTests {
             app.appStatus = GetAppStatus(app: app)
             app.applicationUpDate = "2022-05-08 12:27:50.654GMT+3"
             let fullDateApplicationTime = app.appStatus.applicationUpDate()
-            #expect(fullDateApplicationTime.isEmpty == true)
+            #expect(fullDateApplicationTime.isEmpty == false)
         }
     }
 }
