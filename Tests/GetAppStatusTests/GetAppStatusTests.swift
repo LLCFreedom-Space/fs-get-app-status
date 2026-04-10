@@ -48,6 +48,7 @@ struct GetAppStatusTests {
             app.redis.configuration = try .init(hostname: "localhost")
             let redisStatus = await app.appStatus.getRedisStatus()
             #expect(redisStatus.0 == "Ok")
+            #expect(redisStatus.1 == .ok)
         }
     }
 
