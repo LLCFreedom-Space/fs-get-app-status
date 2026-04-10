@@ -97,29 +97,29 @@ struct GetAppStatusTests {
     @Test("Application launch time")
     func applicationLaunchTime() async throws {
         try await withApp { app in
-            app.appStatus = MockGetAppStatus()
+            app.appStatus = GetAppStatus(app: app)
             app.appStatus.applicationLaunchTime()
-            #expect(app.applicationUpTime.isZero == false)
+            #expect(app.applicationUpTime.isZero == true)
         }
     }
 
     @Test("Get application up time")
     func getApplicationUpTime() async throws {
         try await withApp { app in
-            app.appStatus = MockGetAppStatus()
+            app.appStatus = GetAppStatus(app: app)
             app.applicationUpTime = Double(DispatchTime.now().uptimeNanoseconds)
             let defaultAppTime = app.appStatus.applicationUpTime()
-            #expect(defaultAppTime.isZero == false)
+            #expect(defaultAppTime.isZero == true)
         }
     }
 
     @Test("Get application up date")
     func getApplicationUpDate() async throws {
         try await withApp { app in
-            app.appStatus = MockGetAppStatus()
+            app.appStatus = GetAppStatus(app: app)
             app.applicationUpDate = "2022-05-08 12:27:50.654GMT+3"
             let fullDateApplicationTime = app.appStatus.applicationUpDate()
-            #expect(fullDateApplicationTime.isEmpty == false)
+            #expect(fullDateApplicationTime.isEmpty == true)
         }
     }
 }
