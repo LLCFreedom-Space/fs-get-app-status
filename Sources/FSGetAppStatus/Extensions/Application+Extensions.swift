@@ -72,19 +72,19 @@ extension Application {
     }
     
     /// Storage key for MongoDB request context.
-    private struct MongoDBStorageKey: StorageKey {
+    private struct MongoDatabaseStorageKey: StorageKey {
         typealias Value = MongoDatabase
     }
     /// MongoDB request context associated with the current request.
     public var appStatusMongoDatabase: MongoDatabase {
         get {
-            guard let appStatusMongoDatabase = storage[MongoDBStorageKey.self] else {
-                fatalError("MongoDB not setup.")
+            guard let appStatusMongoDatabase = storage[MongoDatabaseStorageKey.self] else {
+                fatalError("MongoDatabase not setup.")
             }
             return appStatusMongoDatabase
         }
         set {
-            storage[MongoDBStorageKey.self] = newValue
+            storage[MongoDatabaseStorageKey.self] = newValue
         }
     }
     

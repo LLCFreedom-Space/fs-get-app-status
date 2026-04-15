@@ -27,15 +27,15 @@ import Vapor
 
 public struct MockGetAppStatus: GetAppStatusServiceable {
     public func getRedisStatus() async -> (String, String, HTTPResponseStatus) {
-        return ("Ok", "Ok", HTTPResponseStatus.ok)
+        return ("Ok", "7.0.0", HTTPResponseStatus.ok)
     }
 
     public func getPostgresStatus() async -> (String, String, HTTPResponseStatus) {
-        return ("Ok", "Ok", HTTPResponseStatus.ok)
+        return ("Ok", "8.1", HTTPResponseStatus.ok)
     }
 
     public func getMongoDBStatus() async -> (String, String, HTTPResponseStatus) {
-        return ("Ok", "Ok", HTTPResponseStatus.ok)
+        return ("Ok", "8.0.1", HTTPResponseStatus.ok)
     }
 
     public func applicationLaunchTime() { }

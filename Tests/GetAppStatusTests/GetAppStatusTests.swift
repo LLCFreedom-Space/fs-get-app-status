@@ -45,11 +45,12 @@ struct GetAppStatusTests {
         try await withApp { app in
             app.appStatus = MockGetAppStatus()
             // docker run --name redis-test -p 6379:6379 -d redis
+            //            app.appStatus = GetAppStatus(app: app)
             //            app.redis.configuration = try .init(hostname: "localhost")
-            let response = await app.appStatus.getRedisStatus()
-            #expect(response.0 == "Ok")
-            #expect(response.1 != "Version undefined")
-            #expect(response.2 == .ok)
+            let (statusConnect, version, code) = await app.appStatus.getRedisStatus()
+            #expect(statusConnect == "Ok")
+            #expect(version != "Version undefined")
+            #expect(code == .ok)
         }
     }
 
@@ -57,6 +58,7 @@ struct GetAppStatusTests {
         // docker run --name psql-test -e POSTGRES_DB=test -e POSTGRES_USER=test -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
         try await withApp { app in
             app.appStatus = MockGetAppStatus()
+            //            app.appStatus = GetAppStatus(app: app)
             //            app.databases.use(
             //                .postgres(configuration:
             //                        .init(
@@ -70,10 +72,10 @@ struct GetAppStatusTests {
             //                ),
             //                as: .psql
             //            )
-            let response = await app.appStatus.getPostgresStatus()
-            #expect(response.0 == "Ok")
-            #expect(response.1 != "Version undefined")
-            #expect(response.2 == .ok)
+            let (statusConnect, version, code) = await app.appStatus.getPostgresStatus()
+            #expect(statusConnect == "Ok")
+            #expect(version != "Version undefined")
+            #expect(code == .ok)
         }
     }
 
@@ -81,19 +83,14 @@ struct GetAppStatusTests {
     func getMongoDBStatus() async throws {
         // docker run --name test -p 27017:27017 -d mongo
         try await withApp { app in
+//            app.appStatus = GetAppStatus(app: app)
             app.appStatus = MockGetAppStatus()
-            //            let hosts: [ConnectionSettings.Host] = [.init(hostname: "localhost", port: 27017)]
-            //            let settings = ConnectionSettings(
-            //                authentication: .unauthenticated,
-            //                authenticationSource: "test",
-            //                hosts: hosts,
-            //                targetDatabase: "test"
-            //            )
-            //            try await app.mongoDB = MongoDatabase.connect(to: settings)
-            let response = await app.appStatus.getMongoDBStatus()
-            #expect(response.0 == "Ok")
-            #expect(response.1 != "Version undefined")
-            #expect(response.2 == .ok)
+            let connectionString = "mongodb://localhost:27017/test"
+            try app.initializeLazyMongoDatabase(connectionString: connectionString)
+            let (statusConnect, version, code) = await app.appStatus.getMongoDBStatus()
+            #expect(statusConnect == "Ok")
+            #expect(version != "Version undefined")
+            #expect(code == .ok)
         }
     }
 

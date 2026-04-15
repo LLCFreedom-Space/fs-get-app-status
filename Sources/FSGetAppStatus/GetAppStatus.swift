@@ -49,26 +49,29 @@ public struct GetAppStatus: GetAppStatusServiceable {
         var statusCode = HTTPResponseStatus.serviceUnavailable
         do {
             let buffer = ByteBufferAllocator().buffer(string: "server")
-            let response = try await app.redis.send(command: "INFO", with: [RESPValue.bulkString(buffer)])
+            let response = try await app.redis.send(
+                command: "INFO",
+                with: [RESPValue.bulkString(buffer)]
+            )
             if let string = response.string {
-                let version = string
-                    .split(separator: "\n")
-                    .first { $0.hasPrefix("redis_version:") }?
-                    .split(separator: ":")
-                    .last
-                    .map(String.init) ?? "unknown"
-                versionDatabase = version
+                let dict = string.parseRedisInfo()
+                if let version = dict["redis_version"] {
+                    versionDatabase = version
+                } else {
+                    app.logger.error("No version in response: \(response).")
+                    versionDatabase = "Version undefined for database Redis."
+                }
                 statusConnect = "Ok"
                 statusCode = .ok
             } else {
-                app.logger.error("No connect to Redis database. Response: \(response)")
+                app.logger.error("No connect to Redis database. Response: \(response).")
                 versionDatabase = "Version undefined for database Redis."
                 statusConnect = "No connect to Redis database."
             }
         } catch {
-            app.logger.error("No connect to Redis database. Reason: \(error)")
+            app.logger.error("No connect to Redis database. Reason: \(error).")
             versionDatabase = "Version undefined for database Redis."
-            statusConnect = "No connect to Redis database. Reason: \(error)"
+            statusConnect = "No connect to Redis database. Reason: \(error)."
         }
         return (status: statusConnect, version: versionDatabase, code: statusCode)
     }
@@ -90,14 +93,14 @@ public struct GetAppStatus: GetAppStatusServiceable {
                 statusConnect = "Ok"
                 statusCode = .ok
             } else {
-                app.logger.error("No connect to Postgres database. Response: \(String(describing: row))")
+                app.logger.error("No connect to Postgres database. Response: \(String(describing: row)).")
                 versionDatabase = "Version undefined for database Postgres."
                 statusConnect = "No connect to Postgres database."
             }
         } catch {
             app.logger.error("No connect to Postgres database. Reason: \(error)")
             versionDatabase = "Version undefined for database Postgres."
-            statusConnect = "No connect to Postgres database. Reason: \(error)"
+            statusConnect = "No connect to Postgres database. Reason: \(error)."
         }
         return (status: statusConnect, version: versionDatabase, code: statusCode)
     } 
@@ -115,14 +118,14 @@ public struct GetAppStatus: GetAppStatusServiceable {
                 statusConnect = "Ok"
                 statusCode = .ok
             } else {
-                app.logger.error("No connect to Mongo database. Response: \(response)")
+                app.logger.error("No connect to Mongo database. Response: \(response).")
                 versionDatabase = "Version undefined for database Mongo."
                 statusConnect = "No connect to Mongo database."
             }
         } catch {
-            app.logger.error("No connect to Mongo database. Reason: \(error)")
+            app.logger.error("No connect to Mongo database. Reason: \(error).")
             versionDatabase = "Version undefined for database Mongo."
-            statusConnect = "No connect to Mongo database. Reason: \(error)"
+            statusConnect = "No connect to Mongo database. Reason: \(error)."
         }
         return (status: statusConnect, version: versionDatabase, code: statusCode)
     }
