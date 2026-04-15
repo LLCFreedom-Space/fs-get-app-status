@@ -28,8 +28,8 @@ import Testing
 
 @Suite("Redis info parser tests", .serialized)
 struct RedisInfoParserTests {
-
-    func testParseRedisInfo_basicParsing() {
+    @Test("Parse redis info with basic parsing")
+    func basicParsing() {
         // Given
         let input = """
         # Server
@@ -47,7 +47,8 @@ struct RedisInfoParserTests {
         #expect(result["uptime_in_seconds"] == "2286")
     }
 
-    func testParseRedisInfo_ignoresCommentsAndEmptyLines() {
+    @Test("Parse redis info with ignores comments and empty lines")
+    func ignoresCommentsAndEmptyLines() {
         // Given
         let input = """
         # Server
@@ -67,7 +68,8 @@ struct RedisInfoParserTests {
         #expect(result[""] == nil)
     }
 
-    func testParseRedisInfo_missingColonIsIgnored() {
+    @Test("Parse redis info with missing colon is ignored")
+    func missingColonIsIgnored() {
         // Given
         let input = """
         redis_version:7.4.1
@@ -84,7 +86,8 @@ struct RedisInfoParserTests {
         #expect(result.count == 2)
     }
 
-    func testParseRedisInfo_overwritesDuplicateKeys() {
+    @Test("Parse redis info with over writes duplicate keys")
+    func overwritesDuplicateKeys() {
         // Given
         let input =
         """

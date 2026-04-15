@@ -54,7 +54,8 @@ struct GetAppStatusTests {
         }
     }
 
-    func testGetPostgresStatusAsync() async throws {
+    @Test("Get Postgres status")
+    func getPostgresStatus() async throws {
         // docker run --name psql-test -e POSTGRES_DB=test -e POSTGRES_USER=test -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
         try await withApp { app in
             app.appStatus = MockGetAppStatus()
