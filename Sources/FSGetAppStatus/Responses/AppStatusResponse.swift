@@ -25,12 +25,8 @@
 import Vapor
 
 /// A generic application status response that can be returned from a health check endpoint.
-///
-/// This model aggregates system-level and service-level information such as uptime,
-/// hardware metrics, and connectivity status for external dependencies like Redis,
-/// PostgreSQL, and MongoDB.
 public struct AppStatusResponse: Content {
-    /// Indicates the overall application status (e.g., `"Ok"`, `"Degraded"`, `"Down"`).
+    /// Indicates the overall application status.
     public var appStatus: String = "Ok"
     /// The total system uptime in seconds.
     public var systemUptime: TimeInterval
@@ -38,17 +34,17 @@ public struct AppStatusResponse: Content {
     public var activeProcessorCount: Int
     /// The operating system version running the application.
     public var operatingSystemVersion: String
-    /// The total physical memory available on the server (in GB).
+    /// The total physical memory available on the server (in gigabytes).
     public var physicalMemory: Double
-    /// The current Redis connection status (e.g., `"Ok"` or `"Unavailable"`).
+    /// The current Redis connection status.
     public var redisConnectionStatus: String?
     /// The Redis server version.
     public var redisVersion: String?
-    /// The current PostgreSQL connection status (e.g., `"Ok"` or `"Unavailable"`).
+    /// The current PostgreSQL connection status.
     public var psqlConnectionStatus: String?
     /// The PostgreSQL server version.
     public var psqlVersion: String?
-    /// The current MongoDB connection status (e.g., `"Ok"` or `"Unavailable"`).
+    /// The current MongoDB connection status.
     public var mongoConnectionStatus: String?
     /// The MongoDB server version.
     public var mongoVersion: String?
@@ -58,7 +54,6 @@ public struct AppStatusResponse: Content {
     public var appVersion: String?
 
     /// Creates a new `AppStatusResponse`.
-    ///
     /// - Parameters:
     ///   - appStatus: The overall application status. Defaults to `"Ok"`.
     ///   - systemUptime: The system uptime in seconds.
@@ -102,8 +97,29 @@ public struct AppStatusResponse: Content {
         self.appName = appName
         self.appVersion = appVersion
     }
+}
 
-    /// An example instance of `AppStatusResponse` for testing or documentation purposes.
+extension AppStatusResponse {
+    /// Coding keys used to map properties to a snake_case JSON representation.
+    public enum CodingKeys: String, CodingKey {
+        case appStatus = "app_status"
+        case systemUptime = "system_uptime"
+        case activeProcessorCount = "active_processor_count"
+        case operatingSystemVersion = "operating_system_version"
+        case physicalMemory = "physical_memory"
+        case redisConnectionStatus = "redis_connection_status"
+        case psqlConnectionStatus = "psql_connection_status"
+        case mongoConnectionStatus = "mongo_connection_status"
+        case redisVersion = "redis_version"
+        case psqlVersion = "psql_version"
+        case mongoVersion = "mongo_version"
+        case appName = "app_name"
+        case appVersion = "app_version"
+    }
+}
+
+extension AppStatusResponse {
+    /// An example instance of `AppStatusResponse`.
     public static var example: AppStatusResponse {
         AppStatusResponse(
             appStatus: "Ok",
@@ -120,22 +136,5 @@ public struct AppStatusResponse: Content {
             appName: "Name of application",
             appVersion: "1.1.1"
         )
-    }
-
-    /// Coding keys used to map properties to snake_case JSON representation.
-    public enum CodingKeys: String, CodingKey {
-        case appStatus = "app_status"
-        case systemUptime = "system_uptime"
-        case activeProcessorCount = "active_processor_count"
-        case operatingSystemVersion = "operating_system_version"
-        case physicalMemory = "physical_memory"
-        case redisConnectionStatus = "redis_connection_status"
-        case psqlConnectionStatus = "psql_connection_status"
-        case mongoConnectionStatus = "mongo_connection_status"
-        case redisVersion = "redis_version"
-        case psqlVersion = "psql_version"
-        case mongoVersion = "mongo_version"
-        case appName = "app_name"
-        case appVersion = "app_version"
     }
 }

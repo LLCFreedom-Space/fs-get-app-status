@@ -23,18 +23,14 @@
 //
 
 import Vapor
-@preconcurrency import MongoKitten
+import MongoKitten
 
-/// Extensions for storing and accessing custom application-level services and metadata.
 extension Application {
-    /// Storage key for the application status service.
+    /// Storage key for GetAppStatus request context.
     public struct GetAppStatusKey: StorageKey {
-        /// The type of value stored for this key.
         public typealias Value = GetAppStatusServiceable
     }
-    /// Provides access to the application status service.
-    ///
-    /// - Important: This must be configured before use, otherwise the app will crash.
+    /// GetAppStatus request context associated with the current request.
     public var appStatus: GetAppStatusServiceable {
         get {
             guard let appStatus = storage[GetAppStatusKey.self] else {
@@ -46,18 +42,12 @@ extension Application {
             storage[GetAppStatusKey.self] = newValue
         }
     }
-}
-
-/// Extensions for tracking application uptime.
-extension Application {
-    /// Storage key for application uptime value.
+    
+    /// Storage key for ApplicationUpTime request context.
     public struct ApplicationUpTimeKey: StorageKey {
-        /// The type of value stored for this key.
         public typealias Value = TimeInterval
     }
-    /// The total uptime of the application in seconds.
-    ///
-    /// Defaults to `0` if not set.
+    /// ApplicationUpTime request context associated with the current request.
     public var applicationUpTime: TimeInterval {
         get {
             storage[ApplicationUpTimeKey.self] ?? .zero
@@ -66,18 +56,12 @@ extension Application {
             storage[ApplicationUpTimeKey.self] = newValue
         }
     }
-}
-
-/// Extensions for tracking application start date.
-extension Application {
-    /// Storage key for application start date.
+    
+    /// Storage key for ApplicationUpDate request context.
     public struct ApplicationUpDateKey: StorageKey {
-        /// The type of value stored for this key.
         public typealias Value = String
     }
-    /// The date when the application was started.
-    ///
-    /// Stored as a `String`. Defaults to `"0"` if not set.
+    /// ApplicationUpDate request context associated with the current request.
     public var applicationUpDate: String {
         get {
             storage[ApplicationUpDateKey.self] ?? "0"
@@ -86,38 +70,41 @@ extension Application {
             storage[ApplicationUpDateKey.self] = newValue
         }
     }
-}
-
-/// Extensions for MongoDB integration.
-extension Application {
-    /// Storage key for MongoDB database instance.
-    private struct MongoDBStorageKey: StorageKey {
-        /// The type of value stored for this key.
+    
+    /// Storage key for MongoDB request context.
+    private struct MongoDatabaseStorageKey: StorageKey {
         typealias Value = MongoDatabase
     }
-    /// Provides access to the configured MongoDB database.
-    ///
-    /// - Warning: This will crash if accessed before being set.
-    public var mongoDB: MongoDatabase {
+    /// MongoDB request context associated with the current request.
+    public var appStatusMongoDatabase: MongoDatabase {
         get {
-            guard let mongoDB = storage[MongoDBStorageKey.self] else {
-                fatalError("MongoDB not setup.")
+            guard let appStatusMongoDatabase = storage[MongoDatabaseStorageKey.self] else {
+                fatalError("MongoDatabase not setup.")
             }
-            return mongoDB
+            return appStatusMongoDatabase
         }
         set {
-            storage[MongoDBStorageKey.self] = newValue
+            storage[MongoDatabaseStorageKey.self] = newValue
         }
+    }
+    
+    /// Initializes MongoDB cluster with eager connection.
+    /// - Parameter connectionString: MongoDB connection string.
+    public func initializeMongoDatabase(connectionString: String) async throws {
+        self.appStatusMongoDatabase = try await MongoDatabase.connect(to: connectionString)
+    }
+
+    /// Initializes MongoDB cluster with lazy connection.
+    /// - Parameter connectionString: MongoDB connection string.
+    public func initializeLazyMongoDatabase(connectionString: String) throws {
+        self.appStatusMongoDatabase = try MongoDatabase.lazyConnect(to: connectionString)
     }
 }
 
-/// Extensions for shared date formatting utilities.
 extension Application {
-    /// A globally configured `DateFormatter` using the default date format.
-    ///
-    /// - Returns: A new instance of `DateFormatter` configured with `defaultDateFormat`.
-    ///
-    /// - Note: This creates a new instance every time it is accessed.
+    /// ISO 8601-like date formatter (`yyyy-MM-dd'T'HH:mm:ss.SSS`).
+    /// - Warning: `DateFormatter` is not thread-safe.
+    /// - Note: Creates a new instance on each access.
     var globalDateFormat: DateFormatter {
         let formatter = DateFormatter()
         formatter.dateFormat = defaultDateFormat

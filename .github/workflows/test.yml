@@ -1,6 +1,3 @@
-# This workflow will build a Swift project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
-
 name: Test
 
 on:
@@ -9,54 +6,81 @@ on:
   pull_request:
     branches: [ "main" ]
 
-# Allow one concurrent deployment
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # =========================
-  # macOS
-  # =========================
-  macos:
-    runs-on: macos-14
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            name: macOS
+          - os: ubuntu-latest
+            name: Linux
+            container: swift:6.0-jammy
+
+    container: ${{ matrix.container || '' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # macOS only
       - name: Select Xcode
+        if: matrix.os == 'macos-15'
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "15.0.1"
+          xcode-version: "16.3.0"
+
+      # Cache
       - name: Cache SwiftPM
         uses: actions/cache@v4
         with:
           path: |
             .build
+            ~/.swiftpm
             ~/Library/Developer/Xcode/DerivedData
           key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
           restore-keys: |
             ${{ runner.os }}-spm-
+
       - name: Build
         run: swift build -v
-      - name: Test (parallel)
+
+      - name: Test (macOS)
+        if: matrix.os == 'macos-15'
         run: swift test -v --parallel
-  # =========================
-  # Linux
-  # =========================
-  linux:
-    runs-on: ubuntu-latest
-    container: swift:5.9-jammy
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Cache SwiftPM
-        uses: actions/cache@v4
+
+      - name: Test with coverage (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: swift test --enable-code-coverage -v --parallel
+
+      # Coverage тільки для Linux
+      - name: Generate coverage
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          PROF_DIR=$(find .build -type d -name codecov | head -n 1)
+          echo "Profdata dir: $PROF_DIR"
+
+          llvm-profdata merge -sparse $PROF_DIR/*.profdata -o coverage.profdata
+
+          XCTEST=$(find .build -name "*.xctest" | head -n 1)
+
+          llvm-cov export \
+            -instr-profile=coverage.profdata \
+            "$XCTEST" \
+            > coverage.json
+
+      - name: Upload to Codecov
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v4
         with:
-          path: .build
-          key: linux-spm-${{ hashFiles('Package.resolved') }}
-          restore-keys: |
-            linux-spm-
-      - name: Build
-        run: swift build -v
-      - name: Test (parallel)
-        run: swift test -v --parallel
+          files: coverage.json
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

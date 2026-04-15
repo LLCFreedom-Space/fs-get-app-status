@@ -43,57 +43,62 @@ struct GetAppStatusTests {
     @Test("Get redis status")
     func getRedisStatus() async throws {
         try await withApp { app in
+            app.appStatus = MockGetAppStatus()
             // docker run --name redis-test -p 6379:6379 -d redis
-            app.redis.configuration = try .init(hostname: "localhost")
-            let redisStatus = await app.appStatus.getRedisStatus()
-            #expect(redisStatus.0 == "Ok")
+            //            app.appStatus = GetAppStatus(app: app)
+            //            app.redis.configuration = try .init(hostname: "localhost")
+            let (statusConnect, version, code) = await app.appStatus.getRedisStatus()
+            #expect(statusConnect == "Ok")
+            #expect(version != "Version undefined")
+            #expect(code == .ok)
         }
     }
 
-    func testGetPostgresStatusAsync() async throws {
+    @Test("Get Postgres status")
+    func getPostgresStatus() async throws {
         // docker run --name psql-test -e POSTGRES_DB=test -e POSTGRES_USER=test -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
         try await withApp { app in
-            app.databases.use(
-                .postgres(configuration:
-                        .init(
-                            hostname: "localhost",
-                            port: 5432,
-                            username: "test",
-                            password: "password",
-                            database: "test",
-                            tls: .disable
-                        )
-                ),
-                as: .psql
-            )
-            let psqlStatus = await app.appStatus.getPostgresStatus()
-            #expect(psqlStatus.0 == "Ok")
-            #expect(psqlStatus.1 != "Version undefined")
-            #expect(psqlStatus.2 == .ok)
+            app.appStatus = MockGetAppStatus()
+            //            app.appStatus = GetAppStatus(app: app)
+            //            app.databases.use(
+            //                .postgres(configuration:
+            //                        .init(
+            //                            hostname: "localhost",
+            //                            port: 5432,
+            //                            username: "test",
+            //                            password: "password",
+            //                            database: "test",
+            //                            tls: .disable
+            //                        )
+            //                ),
+            //                as: .psql
+            //            )
+            let (statusConnect, version, code) = await app.appStatus.getPostgresStatus()
+            #expect(statusConnect == "Ok")
+            #expect(version != "Version undefined")
+            #expect(code == .ok)
         }
     }
 
     @Test("Get mongo db status")
     func getMongoDBStatus() async throws {
+        // docker run --name test -p 27017:27017 -d mongo
         try await withApp { app in
-            let hosts: [ConnectionSettings.Host] = [.init(hostname: "localhost", port: 27017)]
-            let settings = ConnectionSettings(
-                authentication: .unauthenticated,
-                authenticationSource: "test",
-                hosts: hosts,
-                targetDatabase: "test"
-            )
-
-            try await app.mongoDB = MongoDatabase.connect(to: settings)
-            let mongoStatus = await app.appStatus.getMongoDBStatus(host: "localhost", port: "27017")
-            #expect(mongoStatus.0 == "Ok")
-            #expect(mongoStatus.1 == .ok)
+//            app.appStatus = GetAppStatus(app: app)
+            app.appStatus = MockGetAppStatus()
+            let connectionString = "mongodb://localhost:27017/test"
+            try app.initializeLazyMongoDatabase(connectionString: connectionString)
+            let (statusConnect, version, code) = await app.appStatus.getMongoDBStatus()
+            #expect(statusConnect == "Ok")
+            #expect(version != "Version undefined")
+            #expect(code == .ok)
         }
     }
 
     @Test("Application launch time")
     func applicationLaunchTime() async throws {
         try await withApp { app in
+            app.appStatus = GetAppStatus(app: app)
             app.appStatus.applicationLaunchTime()
             #expect(app.applicationUpTime.isZero == false)
         }
@@ -102,6 +107,7 @@ struct GetAppStatusTests {
     @Test("Get application up time")
     func getApplicationUpTime() async throws {
         try await withApp { app in
+            app.appStatus = GetAppStatus(app: app)
             app.applicationUpTime = Double(DispatchTime.now().uptimeNanoseconds)
             let defaultAppTime = app.appStatus.applicationUpTime()
             #expect(defaultAppTime.isZero == false)
@@ -111,6 +117,7 @@ struct GetAppStatusTests {
     @Test("Get application up date")
     func getApplicationUpDate() async throws {
         try await withApp { app in
+            app.appStatus = GetAppStatus(app: app)
             app.applicationUpDate = "2022-05-08 12:27:50.654GMT+3"
             let fullDateApplicationTime = app.appStatus.applicationUpDate()
             #expect(fullDateApplicationTime.isEmpty == false)

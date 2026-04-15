@@ -31,71 +31,57 @@ import Redis
 ///
 /// This service provides application health diagnostics, including connectivity
 /// checks for external services and runtime metadata such as uptime and launch date.
-public struct GetAppStatus: GetAppStatusServiceable, @unchecked Sendable {
+public struct GetAppStatus: GetAppStatusServiceable {
     /// The Vapor `Application` instance.
-    ///
-    /// ## Discussion
-    /// Provides access to shared services such as databases, logging,
-    /// HTTP client, and application storage.
     public let app: Application
     /// Creates a new status service.
-    ///
     /// - Parameter app: The Vapor application instance.
     public init(app: Application) {
         self.app = app
     }
 
     /// Checks Redis connectivity.
-    ///
     /// - Returns: A tuple containing a human-readable status and HTTP status code.
-    ///
-    /// ## Discussion
-    /// Performs a `PING` command against Redis. A successful response (`PONG`)
-    /// indicates the service is reachable.
-    ///
-    /// ## Example
-    /// ```swift
-    /// ("Ok", .ok)
-    /// ```
-    ///
-    /// ```swift
-    /// ("No connect to Redis database. Reason: timeout", .serviceUnavailable)
-    /// ```
-    public func getRedisStatus() async -> (String, HTTPResponseStatus) {
+    public func getRedisStatus() async -> (String, String, HTTPResponseStatus) {
         try? await app.asyncBoot()
-        let statusCode = HTTPResponseStatus.serviceUnavailable
+        var statusConnect = String()
+        var versionDatabase = String()
+        var statusCode = HTTPResponseStatus.serviceUnavailable
         do {
-            let responseRedis = try await app.redis.ping().get()
-            if responseRedis.description == "PONG" {
-                return ("Ok", .ok)
+            let buffer = ByteBufferAllocator().buffer(string: "server")
+            let response = try await app.redis.send(
+                command: "INFO",
+                with: [RESPValue.bulkString(buffer)]
+            )
+            if let string = response.string {
+                let dict = string.parseRedisInfo()
+                if let version = dict["redis_version"] {
+                    versionDatabase = version
+                } else {
+                    app.logger.error("No version in response: \(response).")
+                    versionDatabase = "Version undefined for database Redis."
+                }
+                statusConnect = "Ok"
+                statusCode = .ok
             } else {
-                return ("No connect to Redis database. Response: \(responseRedis.description)", statusCode)
+                app.logger.error("No connect to Redis database. Response: \(response).")
+                versionDatabase = "Version undefined for database Redis."
+                statusConnect = "No connect to Redis database."
             }
         } catch {
-            app.logger.error("No connect to Redis database. Reason: \(error)")
-            return ("No connect to Redis database. Reason: \(error)", statusCode)
+            app.logger.error("No connect to Redis database. Reason: \(error).")
+            versionDatabase = "Version undefined for database Redis."
+            statusConnect = "No connect to Redis database. Reason: \(error)."
         }
+        return (status: statusConnect, version: versionDatabase, code: statusCode)
     }
 
     /// Checks PostgreSQL connectivity and retrieves version information.
-    ///
     /// - Returns: A tuple containing connection status, database version, and HTTP status.
-    ///
-    /// ## Discussion
-    /// Executes `SELECT version()` to verify connectivity and extract server version.
-    ///
-    /// ## Example
-    /// ```swift
-    /// ("Ok", "PostgreSQL 14.1 (Debian 14.1-1.pgdg110+1) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit", .ok)
-    /// ```
-    ///
-    /// ```swift
-    /// ("No connect to Postgres database.", "Version undefined for database Postgres.", .badRequest)
-    /// ```
     public func getPostgresStatus() async -> (String, String, HTTPResponseStatus) {
         var statusConnect = String()
         var versionDatabase = String()
-        var statusCode = HTTPResponseStatus.badRequest
+        var statusCode = HTTPResponseStatus.serviceUnavailable
         do {
             let rows = try await (app.db(.psql) as? PostgresDatabase)?
                 .simpleQuery("SELECT version()")
@@ -107,93 +93,56 @@ public struct GetAppStatus: GetAppStatusServiceable, @unchecked Sendable {
                 statusConnect = "Ok"
                 statusCode = .ok
             } else {
-                app.logger.error("No connect to Postgres database. Response: \(String(describing: row))")
+                app.logger.error("No connect to Postgres database. Response: \(String(describing: row)).")
                 versionDatabase = "Version undefined for database Postgres."
                 statusConnect = "No connect to Postgres database."
             }
         } catch {
             app.logger.error("No connect to Postgres database. Reason: \(error)")
             versionDatabase = "Version undefined for database Postgres."
-            statusConnect = "No connect to Postgres database. Reason: \(error)"
+            statusConnect = "No connect to Postgres database. Reason: \(error)."
+        }
+        return (status: statusConnect, version: versionDatabase, code: statusCode)
+    } 
+
+    /// Checks MongoDB connectivity via HTTP endpoint.
+    /// - Returns: A tuple containing connection status and HTTP status code.
+    public func getMongoDBStatus() async -> (String, String, HTTPResponseStatus) {
+        var statusConnect = String()
+        var versionDatabase = String()
+        var statusCode = HTTPResponseStatus.serviceUnavailable
+        do {
+            let response = try await app.appStatusMongoDatabase.buildInfo()
+            if response.ok == 1 {
+                versionDatabase = response.version
+                statusConnect = "Ok"
+                statusCode = .ok
+            } else {
+                app.logger.error("No connect to Mongo database. Response: \(response).")
+                versionDatabase = "Version undefined for database Mongo."
+                statusConnect = "No connect to Mongo database."
+            }
+        } catch {
+            app.logger.error("No connect to Mongo database. Reason: \(error).")
+            versionDatabase = "Version undefined for database Mongo."
+            statusConnect = "No connect to Mongo database. Reason: \(error)."
         }
         return (status: statusConnect, version: versionDatabase, code: statusCode)
     }
 
-    /// Checks MongoDB connectivity via HTTP endpoint.
-    ///
-    /// - Parameters:
-    ///   - host: The MongoDB host.
-    ///   - port: The MongoDB port.
-    ///
-    /// - Returns: A tuple containing connection status and HTTP status code.
-    ///
-    /// ## Discussion
-    /// Performs an HTTP request to verify MongoDB availability.
-    ///
-    /// ## Example
-    /// ```swift
-    /// ("Ok", .ok)
-    /// ```
-    ///
-    /// ```swift
-    /// ("No connect to MongoDB database. Reason: connection refused", .notFound)
-    /// ```
-    public func getMongoDBStatus(host: String, port: String) async -> (String, HTTPResponseStatus) {
-        var statusConnect = String()
-        var statusCode = HTTPResponseStatus.notFound
-        do {
-            let res = try await app.client.get(
-                URI(string: "http://\(host):\(port)/?compressors=disabled&gssapiServiceName=mongodb")
-            )
-            if res.status == .ok {
-                statusConnect = "Ok"
-                statusCode = .ok
-            }
-        } catch {
-            app.logger.error("No connect to MongoDB database. Reason: \(error)")
-            statusConnect = "No connect to MongoDB database. Reason: \(error)"
-        }
-        return (status: statusConnect, code: statusCode)
-    }
-
     /// Records the application launch time.
-    ///
-    /// ## Discussion
-    /// Stores system uptime in nanoseconds for later calculations.
-    ///
-    /// ## Example
-    /// ```swift
-    /// applicationLaunchTime()
-    /// ```
     public func applicationLaunchTime() {
         app.applicationUpTime = Double(DispatchTime.now().uptimeNanoseconds)
     }
 
     /// Returns the application uptime.
-    ///
     /// - Returns: The elapsed time in nanoseconds since application launch.
-    ///
-    /// ## Discussion
-    /// Uses a monotonic clock to ensure accuracy.
-    ///
-    /// ## Example
-    /// ```swift
-    /// 98647017841958.0
-    /// ```
     public func applicationUpTime() -> Double {
         let timeNow = Double(DispatchTime.now().uptimeNanoseconds)
         return timeNow - app.applicationUpTime
     }
 
     /// Records the application launch date.
-    ///
-    /// ## Discussion
-    /// Stores the formatted current date using the global formatter.
-    ///
-    /// ## Example
-    /// ```swift
-    /// applicationLaunchDate()
-    /// ```
     public func applicationLaunchDate() {
         let today = Date()
         let dateString = app.globalDateFormat.string(from: today)
@@ -201,20 +150,7 @@ public struct GetAppStatus: GetAppStatusServiceable, @unchecked Sendable {
     }
 
     /// Returns the application uptime as calendar components.
-    ///
     /// - Returns: A string describing elapsed time.
-    ///
-    /// ## Discussion
-    /// Converts stored launch date into readable date components.
-    ///
-    /// ## Example
-    /// ```swift
-    /// "year: 0 month: 0 day: 0 hour: 4 minute: 18 second: 2 isLeapMonth: false"
-    /// ```
-    ///
-    /// ```swift
-    /// "0"
-    /// ```
     public func applicationUpDate() -> String {
         guard let date = app.globalDateFormat.date(from: app.applicationUpDate) else {
             return "0"

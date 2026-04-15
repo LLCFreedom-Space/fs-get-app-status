@@ -24,6 +24,7 @@ let package = Package(
         .package(url: "https://github.com/orlandos-nl/MongoKitten.git", from: "7.2.0"),
         //  Vapor provider for RedisKit + RedisNIO
         .package(url: "https://github.com/vapor/redis.git", from: "5.0.0-alpha.2.2"),
+        // 📄 Swift-DocC plugin for generating documentation.
         .package(url: "https://github.com/apple/swift-docc-plugin.git", from: "1.0.0"),
     ],
     targets: [
