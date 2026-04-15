@@ -1,4 +1,5 @@
 {
+  "originHash" : "e82ba0b2b05bc1e3b8aa818e2aea9086f914b6df70af74f254b2347433888294",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -77,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/orlandos-nl/MongoKitten.git",
       "state" : {
-        "revision" : "e403140d7b59c8ba0c2b00f552933d28470d3a6e",
-        "version" : "7.9.9"
+        "revision" : "e390949a27daf376c106bc8cb5857797d0e64ae5",
+        "version" : "7.16.0"
       }
     },
     {
@@ -370,5 +371,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

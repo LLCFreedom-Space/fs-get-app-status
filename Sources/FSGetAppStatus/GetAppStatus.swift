@@ -85,7 +85,7 @@ public struct GetAppStatus: GetAppStatusServiceable {
             statusConnect = "No connect to Postgres database. Reason: \(error)"
         }
         return (status: statusConnect, version: versionDatabase, code: statusCode)
-    }
+    } 
 
     /// Checks MongoDB connectivity via HTTP endpoint.
     /// - Parameters:

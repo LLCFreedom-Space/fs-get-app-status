@@ -76,12 +76,12 @@ extension Application {
         typealias Value = MongoDatabase
     }
     /// MongoDB request context associated with the current request.
-    public var mongoDB: MongoDatabase {
+    public var mongoDBGetAppStatus: MongoDatabase {
         get {
-            guard let mongoDB = storage[MongoDBStorageKey.self] else {
+            guard let mongoDBGetAppStatus = storage[MongoDBStorageKey.self] else {
                 fatalError("MongoDB not setup.")
             }
-            return mongoDB
+            return mongoDBGetAppStatus
         }
         set {
             storage[MongoDBStorageKey.self] = newValue
