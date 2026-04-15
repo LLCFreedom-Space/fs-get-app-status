@@ -29,8 +29,9 @@ public protocol GetAppStatusServiceable: Sendable {
     /// Checks the connection status of the Redis service.
     /// - Returns: A tuple containing:
     ///   - `String`: Human-readable connection status (e.g., `"Ok"` or error description)
+    ///   - `String`: Database version string
     ///   - `HTTPResponseStatus`: HTTP status representing the result
-    func getRedisStatus() async -> (String, HTTPResponseStatus)
+    func getRedisStatus() async -> (String, String, HTTPResponseStatus)
 
     /// Checks the connection status of PostgreSQL and retrieves its version.
     /// - Returns: A tuple containing:
@@ -40,13 +41,11 @@ public protocol GetAppStatusServiceable: Sendable {
     func getPostgresStatus() async -> (String, String, HTTPResponseStatus)
 
     /// Checks the connection status of the MongoDB service.
-    /// - Parameters:
-    ///   - host: The MongoDB host (e.g., `"localhost"`, `"127.0.0.1"`)
-    ///   - port: The MongoDB port (e.g., `"27017"`)
     /// - Returns: A tuple containing:
     ///   - `String`: Connection status (e.g., `"Ok"` or error message)
+    ///   - `String`: Database version string
     ///   - `HTTPResponseStatus`: HTTP status representing the result
-    func getMongoDBStatus(host: String, port: String) async -> (String, HTTPResponseStatus)
+    func getMongoDBStatus() async -> (String, String, HTTPResponseStatus)
 
     /// Records the application launch time.
     func applicationLaunchTime()

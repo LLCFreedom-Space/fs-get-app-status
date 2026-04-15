@@ -76,16 +76,28 @@ extension Application {
         typealias Value = MongoDatabase
     }
     /// MongoDB request context associated with the current request.
-    public var mongoDBGetAppStatus: MongoDatabase {
+    public var appStatusMongoDatabase: MongoDatabase {
         get {
-            guard let mongoDBGetAppStatus = storage[MongoDBStorageKey.self] else {
+            guard let appStatusMongoDatabase = storage[MongoDBStorageKey.self] else {
                 fatalError("MongoDB not setup.")
             }
-            return mongoDBGetAppStatus
+            return appStatusMongoDatabase
         }
         set {
             storage[MongoDBStorageKey.self] = newValue
         }
+    }
+    
+    /// Initializes MongoDB cluster with eager connection.
+    /// - Parameter connectionString: MongoDB connection string.
+    public func initializeMongoDatabase(connectionString: String) async throws {
+        self.appStatusMongoDatabase = try await MongoDatabase.connect(to: connectionString)
+    }
+
+    /// Initializes MongoDB cluster with lazy connection.
+    /// - Parameter connectionString: MongoDB connection string.
+    public func initializeLazyMongoDatabase(connectionString: String) throws {
+        self.appStatusMongoDatabase = try MongoDatabase.lazyConnect(to: connectionString)
     }
 }
 

@@ -45,10 +45,11 @@ struct GetAppStatusTests {
         try await withApp { app in
             app.appStatus = MockGetAppStatus()
             // docker run --name redis-test -p 6379:6379 -d redis
-            app.redis.configuration = try .init(hostname: "localhost")
-            let redisStatus = await app.appStatus.getRedisStatus()
-            #expect(redisStatus.0 == "Ok")
-            #expect(redisStatus.1 == .ok)
+            //            app.redis.configuration = try .init(hostname: "localhost")
+            let response = await app.appStatus.getRedisStatus()
+            #expect(response.0 == "Ok")
+            #expect(response.1 != "Version undefined")
+            #expect(response.2 == .ok)
         }
     }
 
@@ -69,10 +70,10 @@ struct GetAppStatusTests {
             //                ),
             //                as: .psql
             //            )
-            let psqlStatus = await app.appStatus.getPostgresStatus()
-            #expect(psqlStatus.0 == "Ok")
-            #expect(psqlStatus.1 != "Version undefined")
-            #expect(psqlStatus.2 == .ok)
+            let response = await app.appStatus.getPostgresStatus()
+            #expect(response.0 == "Ok")
+            #expect(response.1 != "Version undefined")
+            #expect(response.2 == .ok)
         }
     }
 
@@ -89,9 +90,10 @@ struct GetAppStatusTests {
             //                targetDatabase: "test"
             //            )
             //            try await app.mongoDB = MongoDatabase.connect(to: settings)
-            let mongoStatus = await app.appStatus.getMongoDBStatus(host: "localhost", port: "27017")
-            #expect(mongoStatus.0 == "Ok")
-            #expect(mongoStatus.1 == .ok)
+            let response = await app.appStatus.getMongoDBStatus()
+            #expect(response.0 == "Ok")
+            #expect(response.1 != "Version undefined")
+            #expect(response.2 == .ok)
         }
     }
 
