@@ -31,7 +31,8 @@ struct RedisInfoParserTests {
     @Test("Parse redis info with basic parsing")
     func basicParsing() {
         // Given
-        let input = """
+        let input =
+        """
         # Server
         redis_version:7.4.1
         redis_mode:standalone

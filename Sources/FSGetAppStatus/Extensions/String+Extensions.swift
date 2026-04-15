@@ -34,7 +34,7 @@ extension String {
     /// - Returns: Dictionary where keys are Redis fields and values are raw string values.
     func parseRedisInfo() -> [String: String] {
         var result: [String: String] = [:]
-        let lines = self.components(separatedBy: "\r\n")
+        let lines = self.components(separatedBy: .newlines)
         for line in lines {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
             // Skip comments and empty lines

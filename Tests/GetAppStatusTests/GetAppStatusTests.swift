@@ -39,7 +39,7 @@ struct GetAppStatusTests {
         }
         try await app.asyncShutdown()
     }
-
+    
     @Test("Get redis status")
     func getRedisStatus() async throws {
         try await withApp { app in
@@ -53,7 +53,7 @@ struct GetAppStatusTests {
             #expect(code == .ok)
         }
     }
-
+    
     @Test("Get Postgres status")
     func getPostgresStatus() async throws {
         // docker run --name psql-test -e POSTGRES_DB=test -e POSTGRES_USER=test -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
@@ -79,12 +79,12 @@ struct GetAppStatusTests {
             #expect(code == .ok)
         }
     }
-
+    
     @Test("Get mongo db status")
     func getMongoDBStatus() async throws {
         // docker run --name test -p 27017:27017 -d mongo
         try await withApp { app in
-//            app.appStatus = GetAppStatus(app: app)
+            //            app.appStatus = GetAppStatus(app: app)
             app.appStatus = MockGetAppStatus()
             let connectionString = "mongodb://localhost:27017/test"
             try app.initializeLazyMongoDatabase(connectionString: connectionString)
@@ -94,7 +94,7 @@ struct GetAppStatusTests {
             #expect(code == .ok)
         }
     }
-
+    
     @Test("Application launch time")
     func applicationLaunchTime() async throws {
         try await withApp { app in
@@ -103,7 +103,7 @@ struct GetAppStatusTests {
             #expect(app.applicationUpTime.isZero == false)
         }
     }
-
+    
     @Test("Get application up time")
     func getApplicationUpTime() async throws {
         try await withApp { app in
@@ -113,7 +113,7 @@ struct GetAppStatusTests {
             #expect(defaultAppTime.isZero == false)
         }
     }
-
+    
     @Test("Get application up date")
     func getApplicationUpDate() async throws {
         try await withApp { app in
