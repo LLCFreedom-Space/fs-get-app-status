@@ -54,7 +54,6 @@ public struct AppStatusResponse: Content {
     public var appVersion: String?
 
     /// Creates a new `AppStatusResponse`.
-    ///
     /// - Parameters:
     ///   - appStatus: The overall application status. Defaults to `"Ok"`.
     ///   - systemUptime: The system uptime in seconds.
@@ -102,8 +101,6 @@ public struct AppStatusResponse: Content {
 
 extension AppStatusResponse {
     /// Coding keys used to map properties to a snake_case JSON representation.
-    ///
-    /// This ensures compatibility with typical REST API conventions.
     public enum CodingKeys: String, CodingKey {
         case appStatus = "app_status"
         case systemUptime = "system_uptime"
@@ -123,11 +120,6 @@ extension AppStatusResponse {
 
 extension AppStatusResponse {
     /// An example instance of `AppStatusResponse`.
-    ///
-    /// Useful for:
-    /// - API documentation
-    /// - Unit tests
-    /// - Mock responses
     public static var example: AppStatusResponse {
         AppStatusResponse(
             appStatus: "Ok",
