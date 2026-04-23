@@ -23,7 +23,7 @@ jobs:
             name: macOS
           - os: ubuntu-latest
             name: Linux
-            container: swift:6.0-jammy
+            container: swift:6.2-jammy
 
     container: ${{ matrix.container || '' }}
 
