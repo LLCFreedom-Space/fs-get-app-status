@@ -1,4 +1,4 @@
-name: Test
+name: Test macOS and linux platforms
 
 on:
   push:
@@ -11,21 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Test (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-15
-            name: macOS
-          - os: ubuntu-latest
-            name: Linux
-            container: swift:6.0-jammy
-
-    container: ${{ matrix.container || '' }}
+  test-apple:
+    name: Test (macOS)
+    runs-on: macos-15
 
     steps:
       - name: Checkout
@@ -33,12 +21,10 @@ jobs:
 
       # macOS only
       - name: Select Xcode
-        if: matrix.os == 'macos-15'
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "16.3.0"
+          xcode-version: latest-stable
 
-      # Cache
       - name: Cache SwiftPM
         uses: actions/cache@v4
         with:
@@ -49,21 +35,52 @@ jobs:
           key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
           restore-keys: |
             ${{ runner.os }}-spm-
+            
+      - name: Test macOS
+        run: |
+          xcodebuild test \
+            -scheme fs-get-app-status \
+            -destination "platform=macOS" \
+            -enableCodeCoverage YES \
+            -skipPackagePluginValidation
+
+      - name: Fetch Coverage
+        uses: sersoft-gmbh/swift-coverage-action@v4
+        id: coverage-files
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  test-linux:
+    name: Test (Linux)
+    runs-on: ubuntu-latest
+    container: swift:6.0-jammy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: |
+            .build
+            ~/.swiftpm
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
 
       - name: Build
         run: swift build -v
 
-      - name: Test (macOS)
-        if: matrix.os == 'macos-15'
-        run: swift test -v --parallel
-
-      - name: Test with coverage (Linux)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Test with coverage
         run: swift test --enable-code-coverage -v --parallel
 
-      # Coverage тільки для Linux
       - name: Generate coverage
-        if: matrix.os == 'ubuntu-latest'
         run: |
           PROF_DIR=$(find .build -type d -name codecov | head -n 1)
           echo "Profdata dir: $PROF_DIR"
@@ -78,7 +95,6 @@ jobs:
             > coverage.json
 
       - name: Upload to Codecov
-        if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v4
         with:
           files: coverage.json
