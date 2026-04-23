@@ -1,4 +1,4 @@
-name: Test
+name: Test using macOS and linux platform
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
             name: macOS
           - os: ubuntu-latest
             name: Linux
-            container: swift:6.0-jammy
+            container: swift:6.2-jammy
 
     container: ${{ matrix.container || '' }}
 
@@ -36,7 +36,7 @@ jobs:
         if: matrix.os == 'macos-15'
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "16.3.0"
+          xcode-version: latest-stable
 
       # Cache
       - name: Cache SwiftPM
@@ -79,7 +79,7 @@ jobs:
 
       - name: Upload to Codecov
         if: matrix.os == 'ubuntu-latest'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: coverage.json
         env:

@@ -42,11 +42,9 @@ public struct GetAppStatus: GetAppStatusServiceable {
 
     /// Checks Redis connectivity.
     /// - Returns: A tuple containing a human-readable status and HTTP status code.
-    public func getRedisStatus() async -> (String, String, HTTPResponseStatus) {
+    public func getRedisStatus() async -> DatabaseStatusResponse {
         try? await app.asyncBoot()
-        var statusConnect = String()
-        var versionDatabase = String()
-        var statusCode = HTTPResponseStatus.serviceUnavailable
+        var databaseStatusResponse = DatabaseStatusResponse()
         do {
             let buffer = ByteBufferAllocator().buffer(string: "server")
             let response = try await app.redis.send(
@@ -56,32 +54,30 @@ public struct GetAppStatus: GetAppStatusServiceable {
             if let string = response.string {
                 let dict = string.parseRedisInfo()
                 if let version = dict["redis_version"] {
-                    versionDatabase = version
+                    databaseStatusResponse.version = version
                 } else {
                     app.logger.error("No version in response: \(response).")
-                    versionDatabase = "Version undefined for database Redis."
+                    databaseStatusResponse.version = "Version undefined for database Redis."
                 }
-                statusConnect = "Ok"
-                statusCode = .ok
+                databaseStatusResponse.statusConnect = "Ok"
+                databaseStatusResponse.statusCode = .ok
             } else {
                 app.logger.error("No connect to Redis database. Response: \(response).")
-                versionDatabase = "Version undefined for database Redis."
-                statusConnect = "No connect to Redis database."
+                databaseStatusResponse.version = "Version undefined for database Redis."
+                databaseStatusResponse.statusConnect = "No connect to Redis database."
             }
         } catch {
             app.logger.error("No connect to Redis database. Reason: \(error).")
-            versionDatabase = "Version undefined for database Redis."
-            statusConnect = "No connect to Redis database. Reason: \(error)."
+            databaseStatusResponse.version = "Version undefined for database Redis."
+            databaseStatusResponse.statusConnect = "No connect to Redis database. Reason: \(error)."
         }
-        return (status: statusConnect, version: versionDatabase, code: statusCode)
+        return databaseStatusResponse
     }
 
     /// Checks PostgreSQL connectivity and retrieves version information.
     /// - Returns: A tuple containing connection status, database version, and HTTP status.
-    public func getPostgresStatus() async -> (String, String, HTTPResponseStatus) {
-        var statusConnect = String()
-        var versionDatabase = String()
-        var statusCode = HTTPResponseStatus.serviceUnavailable
+    public func getPostgresStatus() async -> DatabaseStatusResponse {
+        var databaseStatusResponse = DatabaseStatusResponse()
         do {
             let rows = try await (app.db(.psql) as? PostgresDatabase)?
                 .simpleQuery("SELECT version()")
@@ -89,45 +85,43 @@ public struct GetAppStatus: GetAppStatusServiceable {
 
             let row = rows?.first?.makeRandomAccess()
             if let version = row?[data: "version"].string {
-                versionDatabase = version
-                statusConnect = "Ok"
-                statusCode = .ok
+                databaseStatusResponse.version = version
+                databaseStatusResponse.statusConnect = "Ok"
+                databaseStatusResponse.statusCode = .ok
             } else {
                 app.logger.error("No connect to Postgres database. Response: \(String(describing: row)).")
-                versionDatabase = "Version undefined for database Postgres."
-                statusConnect = "No connect to Postgres database."
+                databaseStatusResponse.version = "Version undefined for database Postgres."
+                databaseStatusResponse.statusConnect = "No connect to Postgres database."
             }
         } catch {
             app.logger.error("No connect to Postgres database. Reason: \(error)")
-            versionDatabase = "Version undefined for database Postgres."
-            statusConnect = "No connect to Postgres database. Reason: \(error)."
+            databaseStatusResponse.version = "Version undefined for database Postgres."
+            databaseStatusResponse.statusConnect = "No connect to Postgres database. Reason: \(error)."
         }
-        return (status: statusConnect, version: versionDatabase, code: statusCode)
-    } 
+        return databaseStatusResponse
+    }
 
     /// Checks MongoDB connectivity via HTTP endpoint.
     /// - Returns: A tuple containing connection status and HTTP status code.
-    public func getMongoDBStatus() async -> (String, String, HTTPResponseStatus) {
-        var statusConnect = String()
-        var versionDatabase = String()
-        var statusCode = HTTPResponseStatus.serviceUnavailable
+    public func getMongoDBStatus() async -> DatabaseStatusResponse {
+        var databaseStatusResponse = DatabaseStatusResponse()
         do {
             let response = try await app.appStatusMongoDatabase.buildInfo()
             if response.ok == 1 {
-                versionDatabase = response.version
-                statusConnect = "Ok"
-                statusCode = .ok
+                databaseStatusResponse.version = response.version
+                databaseStatusResponse.statusConnect = "Ok"
+                databaseStatusResponse.statusCode = .ok
             } else {
                 app.logger.error("No connect to Mongo database. Response: \(response).")
-                versionDatabase = "Version undefined for database Mongo."
-                statusConnect = "No connect to Mongo database."
+                databaseStatusResponse.version = "Version undefined for database Mongo."
+                databaseStatusResponse.statusConnect = "No connect to Mongo database."
             }
         } catch {
             app.logger.error("No connect to Mongo database. Reason: \(error).")
-            versionDatabase = "Version undefined for database Mongo."
-            statusConnect = "No connect to Mongo database. Reason: \(error)."
+            databaseStatusResponse.version = "Version undefined for database Mongo."
+            databaseStatusResponse.statusConnect = "No connect to Mongo database. Reason: \(error)."
         }
-        return (status: statusConnect, version: versionDatabase, code: statusCode)
+        return databaseStatusResponse
     }
 
     /// Records the application launch time.

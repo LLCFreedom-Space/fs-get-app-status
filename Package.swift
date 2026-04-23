@@ -10,8 +10,8 @@ let package = Package(
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(name: "GetAppStatus",
-                 targets: ["GetAppStatus"]),
+        .library(name: "GetAppStatus", targets: ["GetAppStatus"]),
+        .library(name: "XCTGetAppStatus", targets: ["XCTGetAppStatus"]),
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
@@ -23,7 +23,7 @@ let package = Package(
         // 🐈 MongoDB driver based on Swift NIO.
         .package(url: "https://github.com/orlandos-nl/MongoKitten.git", from: "7.16.0"),
         //  Vapor provider for RedisKit + RedisNIO
-        .package(url: "https://github.com/vapor/redis.git", from: "5.0.0-alpha.2.2"),
+        .package(url: "https://github.com/vapor/redis.git", from: "4.14.0"),
         // 📄 Swift-DocC plugin for generating documentation.
         .package(url: "https://github.com/apple/swift-docc-plugin.git", from: "1.0.0"),
     ],
@@ -40,10 +40,17 @@ let package = Package(
                 .product(name: "MongoKitten", package: "MongoKitten")
             ]
         ),
+        .target(
+            name: "XCTGetAppStatus",
+            dependencies: [
+                .target(name: "GetAppStatus"),
+            ]
+        ),
         .testTarget(
             name: "GetAppStatusTests",
             dependencies: [
                 .target(name: "GetAppStatus"),
+                .target(name: "XCTGetAppStatus"),
                 .product(name: "VaporTesting", package: "vapor"),
             ]
         )

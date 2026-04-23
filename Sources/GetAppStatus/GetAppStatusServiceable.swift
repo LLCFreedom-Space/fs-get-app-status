@@ -27,25 +27,16 @@ import Vapor
 /// A service interface for retrieving application health status and runtime metrics.
 public protocol GetAppStatusServiceable: Sendable {
     /// Checks the connection status of the Redis service.
-    /// - Returns: A tuple containing:
-    ///   - `String`: Human-readable connection status (e.g., `"Ok"` or error description)
-    ///   - `String`: Database version string
-    ///   - `HTTPResponseStatus`: HTTP status representing the result
-    func getRedisStatus() async -> (String, String, HTTPResponseStatus)
+    /// - Returns: A `DatabaseStatusResponse` containing the connection status
+    func getRedisStatus() async -> DatabaseStatusResponse
 
     /// Checks the connection status of PostgreSQL and retrieves its version.
-    /// - Returns: A tuple containing:
-    ///   - `String`: Connection status (e.g., `"Ok"` or error message)
-    ///   - `String`: Database version string
-    ///   - `HTTPResponseStatus`: HTTP status representing the result
-    func getPostgresStatus() async -> (String, String, HTTPResponseStatus)
+    /// - Returns: A `DatabaseStatusResponse` containing the connection status
+    func getPostgresStatus() async -> DatabaseStatusResponse
 
     /// Checks the connection status of the MongoDB service.
-    /// - Returns: A tuple containing:
-    ///   - `String`: Connection status (e.g., `"Ok"` or error message)
-    ///   - `String`: Database version string
-    ///   - `HTTPResponseStatus`: HTTP status representing the result
-    func getMongoDBStatus() async -> (String, String, HTTPResponseStatus)
+    /// - Returns: A `DatabaseStatusResponse` containing the connection status
+    func getMongoDBStatus() async -> DatabaseStatusResponse
 
     /// Records the application launch time.
     func applicationLaunchTime()

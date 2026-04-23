@@ -100,7 +100,7 @@ public struct AppStatusResponse: Content {
 }
 
 extension AppStatusResponse {
-    /// Coding keys used to map properties to a snake_case JSON representation.
+    /// Coding keys used to map properties to a `snake_case` JSON representation.
     public enum CodingKeys: String, CodingKey {
         case appStatus = "app_status"
         case systemUptime = "system_uptime"
