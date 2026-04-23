@@ -23,6 +23,7 @@
 //
 
 @testable import GetAppStatus
+@testable import XCTGetAppStatus
 import VaporTesting
 import Testing
 

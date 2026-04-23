@@ -23,6 +23,7 @@
 //
 
 @testable import GetAppStatus
+@testable import XCTGetAppStatus
 import FluentPostgresDriver
 import MongoKitten
 import VaporTesting
@@ -47,10 +48,10 @@ struct GetAppStatusTests {
             // docker run --name redis-test -p 6379:6379 -d redis
             //            app.appStatus = GetAppStatus(app: app)
             //            app.redis.configuration = try .init(hostname: "localhost")
-            let (statusConnect, version, code) = await app.appStatus.getRedisStatus()
-            #expect(statusConnect == "Ok")
-            #expect(version != "Version undefined")
-            #expect(code == .ok)
+            let response = await app.appStatus.getRedisStatus()
+            #expect(response.statusConnect == "Ok")
+            #expect(response.version != "Version undefined")
+            #expect(response.statusCode == .ok)
         }
     }
     
@@ -73,10 +74,10 @@ struct GetAppStatusTests {
             //                ),
             //                as: .psql
             //            )
-            let (statusConnect, version, code) = await app.appStatus.getPostgresStatus()
-            #expect(statusConnect == "Ok")
-            #expect(version != "Version undefined")
-            #expect(code == .ok)
+            let response = await app.appStatus.getPostgresStatus()
+            #expect(response.statusConnect == "Ok")
+            #expect(response.version != "Version undefined")
+            #expect(response.statusCode == .ok)
         }
     }
     
@@ -88,10 +89,10 @@ struct GetAppStatusTests {
             app.appStatus = MockGetAppStatus()
             let connectionString = "mongodb://localhost:27017/test"
             try app.initializeLazyMongoDatabase(connectionString: connectionString)
-            let (statusConnect, version, code) = await app.appStatus.getMongoDBStatus()
-            #expect(statusConnect == "Ok")
-            #expect(version != "Version undefined")
-            #expect(code == .ok)
+            let response = await app.appStatus.getMongoDBStatus()
+            #expect(response.statusConnect == "Ok")
+            #expect(response.version != "Version undefined")
+            #expect(response.statusCode == .ok)
         }
     }
     
